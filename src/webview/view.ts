@@ -1,7 +1,8 @@
 import { Compartment, EditorState, type Extension } from "@codemirror/state";
-import { EditorView } from "@codemirror/view";
+import { EditorView, drawSelection } from "@codemirror/view";
 import type { WebviewConfig } from "../shared/protocol";
 import { readingExtensions } from "../editor/presets";
+import type { EditBridge } from "./bridge";
 
 /**
  * Everything config-dependent sits in a compartment, so a settings change
@@ -19,12 +20,27 @@ function configExtensions(config: WebviewConfig): Extension {
   ];
 }
 
-export function createView(parent: HTMLElement, text: string, config: WebviewConfig): EditorView {
+export function createView(
+  parent: HTMLElement,
+  text: string,
+  config: WebviewConfig,
+  bridge: EditBridge,
+  readOnly: boolean,
+): EditorView {
   return new EditorView({
     parent,
     state: EditorState.create({
       doc: text,
-      extensions: [EditorState.readOnly.of(true), configurable.of(configExtensions(config))],
+      extensions: [
+        EditorState.readOnly.of(readOnly),
+        drawSelection(),
+        // No history(): VS Code owns the undo stack for a TextDocument, and a
+        // second stack over the same text is the classic divergence bug. Cmd-Z is
+        // forwarded to the workbench by the webview host and comes back as a
+        // change event carrying reason Undo.
+        bridge.listener,
+        configurable.of(configExtensions(config)),
+      ],
     }),
   });
 }
