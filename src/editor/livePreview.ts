@@ -4,8 +4,9 @@
  * frontmatter and fenced-code lines are tagged so CSS can style them as blocks.
  */
 import { syntaxTree } from "@codemirror/language";
-import type { EditorState, Range } from "@codemirror/state";
+import { RangeSet, StateField, type EditorState, type Range } from "@codemirror/state";
 import { Decoration, EditorView, ViewPlugin, type DecorationSet, type ViewUpdate } from "@codemirror/view";
+import { rowLine, TableWidget } from "./tableWidget";
 
 const HIDE = new Set(["HeaderMark", "EmphasisMark", "CodeMark", "StrikethroughMark", "QuoteMark"]);
 
@@ -121,3 +122,79 @@ export const livePreview = ViewPlugin.fromClass(
   },
   { decorations: (plugin) => plugin.decorations },
 );
+
+/**
+ * Tables are replaced by a rendered widget, and edited in place inside it.
+ *
+ * Block widgets have to come from a state field, which has no viewport — so
+ * unlike the marks plugin this rebuilds over the whole tree. That is O(doc) per
+ * keystroke, hence the size guard: past it the table stays plain markdown
+ * rather than making every keystroke crawl.
+ */
+const MAX_TABLE_DOC = 300_000;
+
+function buildTables(state: EditorState): DecorationSet {
+  if (state.doc.length > MAX_TABLE_DOC) return Decoration.none;
+
+  const ranges: Range<Decoration>[] = [];
+  syntaxTree(state).iterate({
+    enter: (node) => {
+      if (node.name !== "Table") return;
+      const first = state.doc.lineAt(node.from);
+      const last = state.doc.lineAt(node.to);
+      const widget = new TableWidget(state.doc.sliceString(first.from, last.to));
+      ranges.push(Decoration.replace({ widget, block: true }).range(first.from, last.to));
+      return false;
+    },
+  });
+  return Decoration.set(ranges, true);
+}
+
+const tableField = StateField.define<DecorationSet>({
+  create: buildTables,
+  update: (deco, tr) =>
+    tr.docChanged || syntaxTree(tr.startState) !== syntaxTree(tr.state) ? buildTables(tr.state) : deco,
+  provide: (field) => [
+    EditorView.decorations.from(field),
+    // Without this, arrow-key motion can park the caret inside a replaced table
+    // range with nothing visible to show for it.
+    EditorView.atomicRanges.of((view) => view.state.field(field) as unknown as RangeSet<Decoration>),
+  ],
+});
+
+/** Turns in-place cell edits into document changes. */
+const tableEdits = ViewPlugin.fromClass(
+  class {
+    constructor(readonly view: EditorView) {
+      view.dom.addEventListener("cm-table-edit", this.onEdit as EventListener);
+    }
+
+    onEdit = (event: CustomEvent<{ row: number; col: number; text: string }>) => {
+      const cell = event.target as HTMLElement;
+      const widget = cell.closest(".cm-table-widget");
+      if (!widget) return;
+
+      const { row, col, text } = event.detail;
+      const start = this.view.state.doc.lineAt(this.view.posAtDOM(widget));
+      // Header is the first line, the alignment row the second, so body row r
+      // is at offset r + 2.
+      const line = this.view.state.doc.line(start.number + (row < 0 ? 0 : row + 2));
+
+      const selector = row < 0 ? "th" : `td[data-row="${row}"]`;
+      const cells = [...widget.querySelectorAll<HTMLElement>(selector)].map(
+        (c) => (c as HTMLElement & { _source?: string })._source ?? "",
+      );
+      cells[col] = text;
+
+      const insert = rowLine(cells);
+      if (insert === line.text) return;
+      this.view.dispatch({ changes: { from: line.from, to: line.to, insert } });
+    };
+
+    destroy() {
+      this.view.dom.removeEventListener("cm-table-edit", this.onEdit as EventListener);
+    }
+  },
+);
+
+export const tables = [tableField, tableEdits];

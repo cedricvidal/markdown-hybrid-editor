@@ -35,6 +35,7 @@ function configExtensions(config: WebviewConfig): Extension {
     requestShowFrontmatter.of((show) => vscodeApi.postMessage({ type: "setShowFrontmatter", show })),
     ...readingExtensions({
       livePreview: config.livePreview,
+      renderTables: config.renderTables,
       showFrontmatter: config.showFrontmatter,
       frontmatterHint: frontmatterHintText(),
     }),

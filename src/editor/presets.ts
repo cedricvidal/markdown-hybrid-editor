@@ -4,11 +4,12 @@ import { yamlFrontmatter } from "@codemirror/lang-yaml";
 import { EditorView } from "@codemirror/view";
 import type { Extension } from "@codemirror/state";
 import { editorTheme, hybridHighlight } from "./theme";
-import { livePreview } from "./livePreview";
+import { livePreview, tables } from "./livePreview";
 import { frontmatterVisibility } from "./frontmatterVisibility";
 
 export interface ReadingOptions {
   livePreview: boolean;
+  renderTables: boolean;
   showFrontmatter: boolean;
   /** Shown on the collapsed frontmatter strip, e.g. the real keybinding. */
   frontmatterHint: string;
@@ -28,6 +29,7 @@ export function readingExtensions(options: ReadingOptions): Extension[] {
     yamlFrontmatter({ content: markdown({ base: markdownLanguage }) }),
     syntaxHighlighting(hybridHighlight),
     ...(options.livePreview ? [livePreview] : []),
+    ...(options.renderTables ? tables : []),
     frontmatterVisibility(options.showFrontmatter, options.frontmatterHint),
     editorTheme,
   ];

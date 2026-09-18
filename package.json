@@ -144,6 +144,11 @@
           "type": "boolean",
           "default": true,
           "description": "Hide markdown marks on every line the caret is not on. Turn off to always see raw markdown."
+        },
+        "markdownHybridEditor.tables.render": {
+          "type": "boolean",
+          "default": true,
+          "description": "Render GFM tables as tables, editable cell by cell. Turn off to edit them as markdown."
         }
       }
     },
@@ -171,15 +176,20 @@
     "demo:m2": "node demo/m2.mjs",
     "demo:web": "node demo/web.mjs",
     "dev:web": "vscode-test-web --extensionDevelopmentPath=. --folder-uri=memfs:/sample",
-    "demo:m3": "node demo/m3.mjs"
+    "demo:m3": "node demo/m3.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "demo:m4": "node demo/m4.mjs"
   },
   "devDependencies": {
     "@types/node": "^24.10.1",
     "@types/vscode": "~1.90.0",
     "@vscode/test-web": "^0.0.81",
     "esbuild": "^0.25.0",
+    "jsdom": "^30.1.0",
     "playwright-core": "^1.63.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^5.0.1"
   },
   "packageManager": "pnpm@11.24.0",
   "dependencies": {
