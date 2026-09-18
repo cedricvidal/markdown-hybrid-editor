@@ -50,3 +50,16 @@ export async function setShowFrontmatter(show: boolean): Promise<void> {
     .getConfiguration(SECTION)
     .update("frontmatter.collapsedByDefault", !show, vscode.ConfigurationTarget.Global);
 }
+
+export function frontmatterVisible(): boolean {
+  return !vscode.workspace.getConfiguration(SECTION).get<boolean>("frontmatter.collapsedByDefault", true);
+}
+
+/**
+ * Mirrors the preference into a context key so the editor title bar can show
+ * the state rather than a static button — the same affordance the desktop
+ * original put in its note toolbar.
+ */
+export function publishFrontmatterContext(): void {
+  void vscode.commands.executeCommand("setContext", `${SECTION}.frontmatterVisible`, frontmatterVisible());
+}

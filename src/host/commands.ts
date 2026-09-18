@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { HybridEditorProvider, VIEW_TYPE } from "./HybridEditorProvider";
 import { headings } from "../editor/outline";
-import { SECTION } from "./config";
+import { SECTION, setShowFrontmatter } from "./config";
 
 /** The uri of whatever is in the active tab, custom editor or text editor. */
 function activeUri(): vscode.Uri | undefined {
@@ -88,5 +88,8 @@ export function registerCommands(context: vscode.ExtensionContext): void {
     vscode.commands.registerCommand("markdownHybridEditor.toggleLivePreview", () =>
       toggle("livePreview.enabled", true),
     ),
+    // The editor title bar shows one of these at a time, driven by a context key.
+    vscode.commands.registerCommand("markdownHybridEditor.showFrontmatter", () => setShowFrontmatter(true)),
+    vscode.commands.registerCommand("markdownHybridEditor.hideFrontmatter", () => setShowFrontmatter(false)),
   );
 }

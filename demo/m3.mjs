@@ -92,9 +92,26 @@ try {
   console.log("\n— revealing —");
   await strip?.click();
   await page.waitForTimeout(1200);
-  check("clicking the strip reveals the YAML", (await editorText(frame)).includes("title: Kitchen Sink"));
+  check("clicking the strip reveals the properties", (await editorText(frame)).includes("title: Kitchen Sink"));
   check("strip is gone once revealed", !(await frame.$("[data-demo=frontmatter-strip]")));
-  check("YAML lines are styled as a block", !!(await frame.$(".cm-frontmatter-line")));
+  check("properties are styled as a block", !!(await frame.$(".cm-fm-line")));
+
+  // Frontmatter follows the same rule as the body: rendered away from the caret,
+  // raw source on the line being edited.
+  // Scoped to the frontmatter: the body has a horizontal rule that is also ---.
+  const fenceText = await frame.$$eval(".cm-fm-line", (els) => els.map((e) => e.textContent ?? ""));
+  check("the --- fences step aside", !fenceText.some((t) => t.trim() === "---"), JSON.stringify(fenceText.slice(0, 3)));
+  check("keys and values are set apart", !!(await frame.$(".cm-fm-key")) && !!(await frame.$(".cm-fm-value")));
+  check("no line shows raw source yet", (await frame.$$(".cm-fm-raw")).length === 0);
+
+  await clickLine(frame, page, "tags:");
+  const rawCount = (await frame.$$(".cm-fm-raw")).length;
+  check("clicking a property shows its YAML source", rawCount === 1, `${rawCount} raw line(s)`);
+  const rawFont = await frame.evaluate(() => getComputedStyle(document.querySelector(".cm-fm-raw")).fontFamily);
+  check("the source line reads as source", /mono|menlo|courier/i.test(rawFont), rawFont.slice(0, 30));
+
+  await clickLine(frame, page, "Heading one");
+  check("leaving the line renders it again", (await frame.$$(".cm-fm-raw")).length === 0);
 
   await runCommand(page, "Markdown Hybrid: Toggle Frontmatter");
   await page.waitForTimeout(1200);

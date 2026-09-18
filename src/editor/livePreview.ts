@@ -11,8 +11,18 @@ import { rowLine, TableWidget } from "./tableWidget";
 const HIDE = new Set(["HeaderMark", "EmphasisMark", "CodeMark", "StrikethroughMark", "QuoteMark"]);
 
 const hidden = Decoration.replace({});
-const frontmatterLine = Decoration.line({ class: "cm-frontmatter-line" });
-const frontmatterEnd = Decoration.line({ class: "cm-frontmatter-line cm-frontmatter-end" });
+
+/** Frontmatter, rendered: the properties read as properties. */
+const fmLine = Decoration.line({ class: "cm-fm-line" });
+/** Frontmatter, on the caret line: the YAML source, editable in place. */
+const fmLineRaw = Decoration.line({ class: "cm-fm-line cm-fm-raw" });
+/** The `---` fences, which carry no information once the block reads as one. */
+const fmFence = Decoration.line({ class: "cm-fm-line cm-fm-fence" });
+const fmEnd = Decoration.line({ class: "cm-fm-end" });
+
+const fmKey = Decoration.mark({ class: "cm-fm-key" });
+const fmValue = Decoration.mark({ class: "cm-fm-value" });
+const fmBullet = Decoration.mark({ class: "cm-fm-bullet" });
 const quoteLine = Decoration.line({ class: "cm-quote-line" });
 const codeBlockLine = Decoration.line({ class: "cm-codeblock-line" });
 const mdLink = Decoration.mark({ class: "cm-mdlink" });
@@ -75,7 +85,7 @@ export function buildDecorations(state: EditorState, ranges: readonly { from: nu
             return;
           }
           case "Frontmatter":
-            lineDeco(node.from, node.to, frontmatterLine, frontmatterEnd);
+            decorateFrontmatter(state, node.from, node.to, cursorLines, decorations, seenLines);
             return false;
           case "Blockquote":
             lineDeco(node.from, node.to, quoteLine);
@@ -99,6 +109,71 @@ export function buildDecorations(state: EditorState, ranges: readonly { from: nu
   }
 
   return Decoration.set(decorations, true);
+}
+
+/** `key:` at the start of a line, and the value after it. */
+const FM_PAIR = /^(\s*)([^\s:#][^:]*?)(:)(\s*)(.*)$/;
+/** `- item` in a block list. */
+const FM_ITEM = /^(\s*)(-\s+)(.*)$/;
+const FM_FENCE = /^---\s*$/;
+
+/**
+ * The frontmatter follows the same rule as the body: rendered away from the
+ * caret, raw source on the line being edited. Off the caret a property reads as
+ * a property — the key set apart from its value, the `---` fences out of the
+ * way; on it, the YAML is there to edit directly.
+ */
+function decorateFrontmatter(
+  state: EditorState,
+  from: number,
+  to: number,
+  cursorLines: Set<number>,
+  out: Range<Decoration>[],
+  seenLines: Set<number>,
+): void {
+  const first = state.doc.lineAt(from).number;
+  const last = state.doc.lineAt(Math.max(from, to - 1)).number;
+
+  for (let i = first; i <= last; i++) {
+    if (seenLines.has(i)) continue;
+    seenLines.add(i);
+
+    const line = state.doc.line(i);
+    const onCaret = cursorLines.has(i);
+    const isFence = FM_FENCE.test(line.text);
+
+    out.push((onCaret ? fmLineRaw : isFence ? fmFence : fmLine).range(line.from));
+    // The hairline sits under the closing fence, where the block ends.
+    if (i === last) out.push(fmEnd.range(line.from));
+
+    // On the caret line the source stands as written.
+    if (onCaret) continue;
+
+    if (isFence) {
+      if (line.length > 0) out.push(hidden.range(line.from, line.to));
+      continue;
+    }
+
+    const pair = FM_PAIR.exec(line.text);
+    if (pair) {
+      const keyFrom = line.from + pair[1]!.length;
+      const keyTo = keyFrom + pair[2]!.length;
+      out.push(fmKey.range(keyFrom, keyTo + 1)); // include the colon
+      const valueFrom = keyTo + 1 + pair[4]!.length;
+      if (pair[5]!.length > 0) out.push(fmValue.range(valueFrom, valueFrom + pair[5]!.length));
+      continue;
+    }
+
+    const item = FM_ITEM.exec(line.text);
+    if (item) {
+      const dashFrom = line.from + item[1]!.length;
+      out.push(fmBullet.range(dashFrom, dashFrom + item[2]!.length));
+      if (item[3]!.length > 0) {
+        const textFrom = dashFrom + item[2]!.length;
+        out.push(fmValue.range(textFrom, textFrom + item[3]!.length));
+      }
+    }
+  }
 }
 
 export const livePreview = ViewPlugin.fromClass(

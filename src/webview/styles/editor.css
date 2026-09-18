@@ -51,18 +51,46 @@
   font-style: italic;
 }
 
-/* Frontmatter block: raw YAML, muted mono, hairline below */
-.cm-frontmatter-line {
+/* Frontmatter follows the same rule as the body: rendered away from the caret,
+   raw YAML on the line being edited. */
+.cm-fm-line {
+  font-family: var(--font-ui);
+  font-size: 13.5px;
+  line-height: 1.85;
+  color: var(--text);
+}
+
+/* The line under the caret is the source, and looks like it. */
+.cm-fm-raw {
   font-family: var(--font-mono);
   font-size: 13px;
-  line-height: 1.7;
   color: var(--muted);
 }
 
-.cm-frontmatter-end {
+/* The `---` fences carry nothing once the block reads as properties, so they
+   step aside — leaving only the space that sets the block apart. */
+.cm-fm-fence {
+  font-size: 0;
+  line-height: 0.7;
+}
+
+.cm-fm-end {
   border-bottom: 1px solid var(--line);
-  padding-bottom: 10px !important;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
+}
+
+.cm-fm-key {
+  color: var(--muted);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+.cm-fm-value {
+  color: var(--text);
+}
+
+.cm-fm-bullet {
+  color: var(--accent);
 }
 
 /* Markdown links: the text alone once the caret leaves the line */
