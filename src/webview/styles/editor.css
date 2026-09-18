@@ -18,12 +18,19 @@
 :root[data-typography="vscode"] .cm-h4 { font-size: 1em; }
 
 /* Inline code and fenced blocks */
+/* A code span sits inside a sentence, so it must not push the sentence apart.
+   The padding is pulled back with an equal-ish negative margin: the chip keeps
+   a background with room to breathe, while its advance width stays close to the
+   text it contains — otherwise punctuation touching a span, as in
+   `(package \`name\`);`, is shunted away from it and the line reads wrong. */
 .cm-code {
   font-family: var(--font-mono);
-  font-size: 0.85em;
+  /* Mono runs small against the serif body; 0.88 keeps them nearer in size. */
+  font-size: 0.88em;
   background: var(--raised);
   border-radius: 4px;
-  padding: 1px 5px;
+  padding: 1px 4px;
+  margin: 0 -2px;
 }
 
 .cm-codeblock-line {
@@ -37,6 +44,7 @@
 .cm-codeblock-line .cm-code {
   background: transparent;
   padding: 0;
+  margin: 0;
   font-size: inherit;
 }
 
@@ -264,6 +272,7 @@ body.vscode-high-contrast-light .cm-code {
 
 .cm-table-widget .cm-code {
   font-size: 0.9em;
+  margin: 0;
 }
 
 .cm-table-widget::-webkit-scrollbar {
