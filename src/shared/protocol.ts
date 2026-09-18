@@ -52,13 +52,25 @@ export interface WebviewConfig {
 
 /** host -> webview */
 export type HostMessage =
-  | { type: "init"; text: string; config: WebviewConfig }
+  /** First load, tab re-show and window reload all arrive here. */
+  | { type: "init"; text: string; config: WebviewConfig; readOnly: boolean; active: boolean }
   | { type: "config"; config: WebviewConfig }
+  /** Changes made elsewhere: another split, an external tool, undo/redo. */
+  | { type: "apply"; changes: WireChange[]; isUndoRedo: boolean }
+  /** Authoritative text, when the fast path cannot be trusted. */
+  | { type: "resync"; text: string }
+  /** Cheap idle consistency probe; the webview answers only on mismatch. */
+  | { type: "verify"; length: number; hash: number }
+  /** Flush pending edits now — a save is waiting on them. */
+  | { type: "flush"; token: number }
   | { type: "focus" };
 
 /** webview -> host */
 export type WebviewMessage =
   | { type: "ready"; persisted: PersistedState | null }
+  /** A batch of local edits, in pre-batch document coordinates. */
+  | { type: "edits"; changes: WireChange[]; token: number | null }
+  /** The view can no longer be trusted to match the document. */
+  | { type: "resyncRequest"; reason: string }
+  | { type: "selection"; selection: WireSelection; line: number; column: number; words: number }
   | { type: "error"; message: string };
-
-export const WEBVIEW_MESSAGE_TYPES = ["ready", "error"] as const;
