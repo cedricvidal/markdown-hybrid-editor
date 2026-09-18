@@ -1,12 +1,78 @@
-/* Live-preview visuals. Filled in as the decorations land (M1/M3/M4). */
+/* Live-preview visuals. The classes come from the highlight style and the
+   decorations; the values come from the theme bridge in tokens.css. */
 
-.mhe-raw {
-  margin: 0;
-  padding: 16px 40px;
-  max-width: var(--editor-measure);
+.cm-editor {
+  height: 100%;
+}
+
+/* Headings */
+.cm-h1 { font-size: 30px; font-weight: 600; line-height: 1.25; }
+.cm-h2 { font-size: 24px; font-weight: 600; line-height: 1.3; }
+.cm-h3 { font-size: 20px; font-weight: 600; line-height: 1.35; }
+.cm-h4 { font-size: 17px; font-weight: 600; }
+
+/* In "pure VS Code" typography the reading scale would fight the editor font. */
+:root[data-typography="vscode"] .cm-h1 { font-size: 1.6em; }
+:root[data-typography="vscode"] .cm-h2 { font-size: 1.4em; }
+:root[data-typography="vscode"] .cm-h3 { font-size: 1.2em; }
+:root[data-typography="vscode"] .cm-h4 { font-size: 1em; }
+
+/* Inline code and fenced blocks */
+.cm-code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  background: var(--raised);
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+
+.cm-codeblock-line {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  background: var(--raised);
+  padding-left: 14px !important;
+  padding-right: 14px !important;
+}
+
+.cm-codeblock-line .cm-code {
+  background: transparent;
+  padding: 0;
+  font-size: inherit;
+}
+
+/* Quotes */
+.cm-quote-line {
+  border-left: 2px solid var(--vscode-textBlockQuote-border, var(--accent));
+  padding-left: 14px !important;
+  color: var(--muted);
+}
+
+.cm-quote {
+  font-style: italic;
+}
+
+/* Frontmatter block: raw YAML, muted mono, hairline below */
+.cm-frontmatter-line {
   font-family: var(--font-mono);
   font-size: 13px;
-  line-height: 1.6;
-  white-space: pre-wrap;
-  word-break: break-word;
+  line-height: 1.7;
+  color: var(--muted);
+}
+
+.cm-frontmatter-end {
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 10px !important;
+  margin-bottom: 14px;
+}
+
+/* Markdown links: the text alone once the caret leaves the line */
+.cm-mdlink {
+  color: var(--accent);
+}
+
+/* High contrast themes fill nothing, so the code chip needs an edge instead. */
+body.vscode-high-contrast .cm-code,
+body.vscode-high-contrast-light .cm-code {
+  background: transparent;
+  outline: 1px solid var(--line);
 }
