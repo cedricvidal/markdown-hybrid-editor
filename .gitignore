@@ -12,6 +12,6 @@ demo/out/take-*/
 # Gate screenshots are regenerated on every run; the walkthrough assets
 # (video, GIF and the numbered stills) are committed for the README.
 demo/out/m[0-9]-*.png
-demo/out/web.png
+demo/out/web*.png
 
 .DS_Store
