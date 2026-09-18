@@ -1,0 +1,4 @@
+# esbuild's postinstall only resolves its platform binary; allowed so `pnpm install`
+# is clean on every platform, not just the one where the optional dep happens to work.
+allowBuilds:
+  esbuild: true

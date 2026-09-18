@@ -1,0 +1,94 @@
+{
+  "name": "markdown-hybrid-editor",
+  "displayName": "Markdown Hybrid Editor",
+  "description": "Hybrid markdown editing: markup hides on every line the caret is not on, so a note reads like prose but edits like source.",
+  "version": "0.0.1",
+  "license": "MIT",
+  "author": {
+    "name": "Cedric Vidal",
+    "email": "cedric.vidal@gmail.com"
+  },
+  "publisher": "cedricvidal",
+  "private": true,
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Visualization"
+  ],
+  "keywords": [
+    "markdown",
+    "live preview",
+    "wysiwyg",
+    "obsidian",
+    "codemirror"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "customEditors": [
+      {
+        "viewType": "markdownHybridEditor.editor",
+        "displayName": "Markdown Hybrid Editor",
+        "selector": [
+          {
+            "filenamePattern": "*.md"
+          }
+        ],
+        "priority": "default"
+      }
+    ],
+    "commands": [
+      {
+        "command": "markdownHybridEditor.openWithTextEditor",
+        "title": "Reopen in Text Editor",
+        "category": "Markdown Hybrid",
+        "icon": "$(code)"
+      },
+      {
+        "command": "markdownHybridEditor.openWithHybrid",
+        "title": "Reopen in Hybrid Editor",
+        "category": "Markdown Hybrid",
+        "icon": "$(book)"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "markdownHybridEditor.openWithTextEditor",
+          "when": "activeCustomEditorId == markdownHybridEditor.editor",
+          "group": "navigation@1"
+        },
+        {
+          "command": "markdownHybridEditor.openWithHybrid",
+          "when": "resourceLangId == markdown && !activeCustomEditorId",
+          "group": "navigation@1"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "markdownHybridEditor.openWithTextEditor",
+          "when": "activeCustomEditorId == markdownHybridEditor.editor"
+        },
+        {
+          "command": "markdownHybridEditor.openWithHybrid",
+          "when": "resourceLangId == markdown && !activeCustomEditorId"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "build": "node esbuild.mjs --production",
+    "watch": "node esbuild.mjs --watch",
+    "typecheck": "tsc --noEmit -p tsconfig.host.json && tsc --noEmit -p tsconfig.webview.json",
+    "package": "pnpm typecheck && pnpm build && vsce package --no-dependencies"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/vscode": "~1.90.0",
+    "esbuild": "^0.25.0",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {},
+  "packageManager": "pnpm@11.24.0"
+}

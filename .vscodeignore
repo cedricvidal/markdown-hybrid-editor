@@ -1,0 +1,11 @@
+# Ship the built bundles and the docs. Nothing else.
+**
+!dist/extension.js
+!dist/webview.js
+!dist/webview.css
+!package.json
+!README.md
+!CHANGELOG.md
+!LICENSE
+!demo/out/*.png
+!demo/out/*.gif
