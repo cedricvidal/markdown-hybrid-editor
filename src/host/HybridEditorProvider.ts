@@ -5,6 +5,8 @@ import { readConfig, SECTION, setShowFrontmatter } from "./config";
 import { DocumentSync } from "./DocumentSync";
 import { EditorSession } from "./EditorSession";
 import { validateChanges } from "./positions";
+import { StatusBar } from "./statusBar";
+import type { EditorCommand } from "../shared/protocol";
 
 export const VIEW_TYPE = "markdownHybridEditor.editor";
 
@@ -13,13 +15,31 @@ export const VIEW_TYPE = "markdownHybridEditor.editor";
  * the webview is only a view onto it, and `DocumentSync` keeps the two in step.
  */
 export class HybridEditorProvider implements vscode.CustomTextEditorProvider {
+  private static current: { session: EditorSession; document: vscode.TextDocument } | undefined;
+  private static readonly statusBar = new StatusBar();
+
   constructor(private readonly context: vscode.ExtensionContext) {}
 
   static register(context: vscode.ExtensionContext): vscode.Disposable {
-    return vscode.window.registerCustomEditorProvider(VIEW_TYPE, new HybridEditorProvider(context), {
+    const provider = vscode.window.registerCustomEditorProvider(VIEW_TYPE, new HybridEditorProvider(context), {
       supportsMultipleEditorsPerDocument: true,
       webviewOptions: { retainContextWhenHidden: false },
     });
+    return vscode.Disposable.from(provider, HybridEditorProvider.statusBar);
+  }
+
+  /** The hybrid editor in front, if there is one. */
+  static active(): { session: EditorSession; document: vscode.TextDocument } | undefined {
+    return HybridEditorProvider.current;
+  }
+
+  /** Send an editor action to the focused webview. */
+  static send(name: EditorCommand): void {
+    HybridEditorProvider.current?.session.post({ type: "command", name });
+  }
+
+  static reveal(line: number): void {
+    HybridEditorProvider.current?.session.post({ type: "reveal", line });
   }
 
   resolveCustomTextEditor(document: vscode.TextDocument, panel: vscode.WebviewPanel): void {
@@ -91,6 +111,9 @@ export class HybridEditorProvider implements vscode.CustomTextEditorProvider {
             return;
 
           case "selection":
+            if (HybridEditorProvider.current?.session === session) {
+              HybridEditorProvider.statusBar.update(message.line, message.column, message.words);
+            }
             return;
 
           case "error":
@@ -106,12 +129,24 @@ export class HybridEditorProvider implements vscode.CustomTextEditorProvider {
         // With retainContextWhenHidden off the webview is torn down when hidden,
         // so anything buffered has to leave first. Gaining focus needs an explicit
         // nudge or the tab looks focused while keystrokes go nowhere.
-        if (panel.active) session.post({ type: "focus" });
+        if (panel.active) {
+          HybridEditorProvider.current = { session, document };
+          session.post({ type: "focus" });
+        } else if (HybridEditorProvider.current?.session === session) {
+          HybridEditorProvider.current = undefined;
+          HybridEditorProvider.statusBar.hide();
+        }
       }),
     );
 
+    if (panel.active) HybridEditorProvider.current = { session, document };
+
     panel.onDidDispose(() => {
       // One leaked listener per closed tab is the classic custom-editor leak.
+      if (HybridEditorProvider.current?.session === session) {
+        HybridEditorProvider.current = undefined;
+        HybridEditorProvider.statusBar.hide();
+      }
       session.dispose();
       sync.release(session);
     });
