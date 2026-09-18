@@ -16,8 +16,12 @@ export function makeNonce(): string {
  *
  * - `img-src`/`font-src`/`connect-src` are `'none'`: we render no images and bundle
  *   no fonts, so note content cannot make a single outbound request.
- * - `style-src` is nonce'd rather than `'unsafe-inline'`: CodeMirror mounts its
- *   stylesheets through `EditorView.cspNonce` -> `StyleModule.mount(.., {nonce})`.
+ * - `style-src` has to allow inline. CodeMirror sets `style` *attributes* on the
+ *   elements it renders, and a nonce cannot cover a style attribute — and a
+ *   source list containing a nonce makes the browser ignore `'unsafe-inline'`
+ *   altogether, so it is one or the other. The cost is bounded: with `img-src`,
+ *   `font-src` and `connect-src` all `'none'`, CSS has nowhere to send anything.
+ *   `script-src` stays nonce-only, which is where the real risk lives.
  * - `form-action` and `base-uri` do NOT inherit from `default-src`, so they are
  *   listed explicitly; omitting them leaves a crafted <form>/<base> usable.
  * - `require-trusted-types-for 'script'` makes the browser *enforce* the
@@ -28,7 +32,7 @@ function csp(nonce: string, cspSource: string): string {
   return [
     "default-src 'none'",
     `script-src 'nonce-${nonce}'`,
-    `style-src 'nonce-${nonce}' ${cspSource}`,
+    `style-src 'unsafe-inline' ${cspSource}`,
     "img-src 'none'",
     "font-src 'none'",
     "connect-src 'none'",
