@@ -1,7 +1,8 @@
 import "./styles/tokens.css";
 import "./styles/editor.css";
 import { EditorSelection } from "@codemirror/state";
-import type { EditorView } from "@codemirror/view";
+import { EditorView } from "@codemirror/view";
+import { findNext, findPrevious, openSearchPanel } from "@codemirror/search";
 import type { HostMessage, WebviewConfig, WireChange } from "../shared/protocol";
 import { readPersisted, vscodeApi, writePersisted } from "./persist";
 import { EditBridge, fromHost, offsetAt } from "./bridge";
@@ -105,6 +106,12 @@ window.addEventListener("message", (event: MessageEvent<HostMessage>) => {
     case "flush":
       bridge.flushFor(message.token);
       return;
+    case "command":
+      runCommand(message.name);
+      return;
+    case "reveal":
+      reveal(message.line);
+      return;
     case "focus":
       view?.focus();
       return;
@@ -119,6 +126,35 @@ document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "hidden") bridge.flush();
   persist();
 });
+
+function runCommand(name: string): void {
+  if (!view) return;
+  view.focus();
+  switch (name) {
+    case "find":
+    case "replace":
+      openSearchPanel(view);
+      return;
+    case "findNext":
+      findNext(view);
+      return;
+    case "findPrevious":
+      findPrevious(view);
+      return;
+  }
+}
+
+/** Put the caret at the start of a one-based line and centre it. */
+function reveal(line: number): void {
+  if (!view) return;
+  const target = view.state.doc.line(Math.max(1, Math.min(line, view.state.doc.lines)));
+  view.dispatch({
+    selection: EditorSelection.cursor(target.from),
+    effects: EditorView.scrollIntoView(target.from, { y: "center" }),
+    annotations: fromHost.of(true),
+  });
+  view.focus();
+}
 
 function persist(): void {
   if (!view) return;

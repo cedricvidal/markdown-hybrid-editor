@@ -66,7 +66,13 @@ export type HostMessage =
   | { type: "verify"; length: number; hash: number }
   /** Flush pending edits now — a save is waiting on them. */
   | { type: "flush"; token: number }
+  /** Run an editor action the workbench cannot reach inside the webview. */
+  | { type: "command"; name: EditorCommand }
+  /** Put the caret on a line and scroll it into view. */
+  | { type: "reveal"; line: number }
   | { type: "focus" };
+
+export type EditorCommand = "find" | "replace" | "findNext" | "findPrevious";
 
 /** webview -> host */
 export type WebviewMessage =

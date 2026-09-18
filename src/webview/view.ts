@@ -2,6 +2,8 @@ import { Compartment, EditorState, type Extension } from "@codemirror/state";
 import { EditorView, drawSelection } from "@codemirror/view";
 import type { WebviewConfig } from "../shared/protocol";
 import { readingExtensions } from "../editor/presets";
+import { editingExtensions } from "../editor/editing";
+import { wordCount } from "../editor/outline";
 import { initialSelection, setShowFrontmatter } from "../editor/frontmatterVisibility";
 import { requestShowFrontmatter } from "../editor/hostBridge";
 import type { EditBridge } from "./bridge";
@@ -63,7 +65,9 @@ export function createView(
         // second stack over the same text is the classic divergence bug. Cmd-Z is
         // forwarded to the workbench by the webview host and comes back as a
         // change event carrying reason Undo.
+        ...(readOnly ? [] : editingExtensions()),
         bridge.listener,
+        selectionReporter,
         configurable.of(configExtensions(config)),
       ],
     }),
@@ -80,6 +84,29 @@ export function reconfigure(view: EditorView, config: WebviewConfig): void {
     ],
   });
 }
+
+/**
+ * Feeds the status bar. A custom editor is not a text editor, so VS Code's own
+ * Ln/Col indicator has nothing to show; this replaces it.
+ */
+const selectionReporter = EditorView.updateListener.of((update) => {
+  if (!update.selectionSet && !update.docChanged) return;
+  const { state } = update;
+  const head = state.selection.main.head;
+  const line = state.doc.lineAt(head);
+  const toPos = (offset: number) => {
+    const l = state.doc.lineAt(offset);
+    return { line: l.number - 1, character: offset - l.from };
+  };
+  const { anchor } = state.selection.main;
+  vscodeApi.postMessage({
+    type: "selection",
+    selection: { anchor: toPos(anchor), head: toPos(head) },
+    line: line.number,
+    column: head - line.from + 1,
+    words: wordCount(state.doc.toString()),
+  });
+});
 
 /**
  * Typography that is pure CSS lives on <html>, not in the CodeMirror theme, so
