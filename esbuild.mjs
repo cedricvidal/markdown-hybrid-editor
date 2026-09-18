@@ -37,6 +37,22 @@ const host = {
 };
 
 /**
+ * The same host sources for vscode.dev / github.dev, where the extension host is
+ * a Web Worker. platform:"browser" makes esbuild *fail* on any Node builtin, so
+ * this bundle doubles as a guard against one creeping in.
+ */
+const hostWeb = {
+  ...common,
+  entryPoints: ["src/extension.ts"],
+  outfile: "dist/extension.web.js",
+  platform: "browser",
+  format: "cjs",
+  target: "es2022",
+  external: ["vscode"],
+  define: { global: "globalThis" },
+};
+
+/**
  * Webview: browser, IIFE so nothing leaks to globals. `main.ts` imports the CSS,
  * which esbuild emits alongside as dist/webview.css.
  */
@@ -49,10 +65,12 @@ const webview = {
   target: "es2022",
 };
 
+const targets = [host, hostWeb, webview];
+
 if (watch) {
-  const contexts = await Promise.all([host, webview].map((c) => esbuild.context(c)));
+  const contexts = await Promise.all(targets.map((c) => esbuild.context(c)));
   await Promise.all(contexts.map((c) => c.watch()));
   console.log("watching…");
 } else {
-  await Promise.all([host, webview].map((c) => esbuild.build(c)));
+  await Promise.all(targets.map((c) => esbuild.build(c)));
 }

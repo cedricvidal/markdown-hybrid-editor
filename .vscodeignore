@@ -1,6 +1,7 @@
 # Ship the built bundles and the docs. Nothing else.
 **
 !dist/extension.js
+!dist/extension.web.js
 !dist/webview.js
 !dist/webview.css
 !package.json

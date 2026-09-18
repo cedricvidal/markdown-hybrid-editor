@@ -123,14 +123,17 @@
   "scripts": {
     "build": "node esbuild.mjs --production",
     "watch": "node esbuild.mjs --watch",
-    "typecheck": "tsc --noEmit -p tsconfig.host.json && tsc --noEmit -p tsconfig.webview.json",
+    "typecheck": "tsc --noEmit -p tsconfig.host.json && tsc --noEmit -p tsconfig.web.json && tsc --noEmit -p tsconfig.webview.json",
     "package": "pnpm typecheck && pnpm build && vsce package --no-dependencies",
     "demo:smoke": "node demo/smoke.mjs",
-    "demo:m2": "node demo/m2.mjs"
+    "demo:m2": "node demo/m2.mjs",
+    "demo:web": "node demo/web.mjs",
+    "dev:web": "vscode-test-web --extensionDevelopmentPath=. --folder-uri=memfs:/sample"
   },
   "devDependencies": {
     "@types/node": "^24.10.1",
     "@types/vscode": "~1.90.0",
+    "@vscode/test-web": "^0.0.81",
     "esbuild": "^0.25.0",
     "playwright-core": "^1.63.0",
     "typescript": "^5.9.3"
@@ -144,5 +147,12 @@
     "@codemirror/view": "^6.43.12",
     "@lezer/common": "^1.5.2",
     "@lezer/highlight": "^1.2.3"
+  },
+  "browser": "./dist/extension.web.js",
+  "capabilities": {
+    "virtualWorkspaces": true,
+    "untrustedWorkspaces": {
+      "supported": true
+    }
   }
 }

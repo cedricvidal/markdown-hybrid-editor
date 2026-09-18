@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    // The web extension host is a Web Worker: no Node globals, no DOM. Type-
+    // checking the host sources against this as well as the Node config is what
+    // proves they are genuinely portable rather than accidentally so.
+    "lib": ["ES2022", "WebWorker"],
+    "types": ["vscode"]
+  },
+  "include": ["src/extension.ts", "src/host/**/*.ts", "src/shared/**/*.ts"]
+}
