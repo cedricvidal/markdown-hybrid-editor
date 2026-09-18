@@ -20,6 +20,10 @@ Built on CodeMirror 6. Runs in VS Code desktop and in the browser
 - **Live preview inline.** Headings, `**bold**`, `*emphasis*`, `~~strikethrough~~`,
   `` `code` `` and `>` quotes lose their marks away from the caret and get them
   straight back on the line you are editing.
+- **Soft breaks reflow.** A single newline inside a paragraph is a space in
+  markdown, so a file hand-wrapped at 80 columns reads as flowing prose rather
+  than ragged fragments. Put the caret in a paragraph and it snaps back to its
+  real source lines. Hard breaks, code fences and tables keep their breaks.
 - **Links collapse to their text.** `[label](https://…)` reads as *label*; a bare
   `[label]` with no URL, like `app[bot]`, is left alone.
 - **GitHub alerts** — `> [!NOTE]`, `[!TIP]`, `[!IMPORTANT]`, `[!WARNING]`,

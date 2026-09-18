@@ -6,9 +6,12 @@ import type { Extension } from "@codemirror/state";
 import { editorTheme, hybridHighlight } from "./theme";
 import { livePreview, tables } from "./livePreview";
 import { frontmatterVisibility } from "./frontmatterVisibility";
+import { reflow } from "./reflow";
 
 export interface ReadingOptions {
   livePreview: boolean;
+  /** Join soft-wrapped paragraph lines, as a markdown renderer does. */
+  reflow: boolean;
   renderTables: boolean;
   showFrontmatter: boolean;
   /** Shown on the collapsed frontmatter strip, e.g. the real keybinding. */
@@ -29,6 +32,7 @@ export function readingExtensions(options: ReadingOptions): Extension[] {
     yamlFrontmatter({ content: markdown({ base: markdownLanguage }) }),
     syntaxHighlighting(hybridHighlight),
     ...(options.livePreview ? [livePreview] : []),
+    ...(options.reflow ? [reflow] : []),
     ...(options.renderTables ? tables : []),
     frontmatterVisibility(options.showFrontmatter, options.frontmatterHint),
     editorTheme,

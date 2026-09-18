@@ -199,6 +199,11 @@
           "default": 1500000,
           "minimum": 10000,
           "markdownDescription": "Documents larger than this many characters open with a notice instead of the hybrid editor. Hiding markup and rendering tables means re-reading the whole document as you type."
+        },
+        "markdownHybridEditor.reflowParagraphs": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Join soft-wrapped lines within a paragraph, the way markdown renders them — a single newline is a space. The paragraph under the caret snaps back to its source lines. Turn off to keep every source line on its own line."
         }
       }
     },

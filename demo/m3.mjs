@@ -155,6 +155,51 @@ try {
 
   await page.screenshot({ path: "demo/out/m3-live-preview.png" });
 
+  console.log("\n— inline code, and soft breaks —");
+  await runCommand(page, "View: Close All Editors");
+  await page.waitForTimeout(1200);
+  await openFile(page, "inline-code.md");
+  const code = await webviewFrame(page, ".cm-content");
+  await code.waitForSelector(".cm-code");
+  await page.waitForTimeout(800);
+
+  const codeLines = () => code.$$eval(".cm-line", (els) => els.map((e) => e.textContent ?? ""));
+  let cl = await codeLines();
+  const sentence = cl.find((l) => l.includes("@scope/portal")) ?? "";
+
+  // A code span must not push the sentence apart: punctuation touching one
+  // has to stay touching it.
+  check("punctuation stays against a code span", sentence.includes("(package @scope/portal); a second"), JSON.stringify(sentence.slice(0, 70)));
+
+  // The chip keeps padding for its background but pulls it back with a negative
+  // margin, so its advance width stays near the text it contains.
+  const chip = await code.evaluate(() => {
+    const el = [...document.querySelectorAll(".cm-code")].find((c) => c.textContent === "@scope/portal");
+    if (!el) return null;
+    const cs = getComputedStyle(el);
+    return { left: parseFloat(cs.marginLeft), right: parseFloat(cs.marginRight), pad: parseFloat(cs.paddingLeft) };
+  });
+  check("the code span's padding is pulled back", (chip?.left ?? 0) < 0 && (chip?.right ?? 0) < 0,
+    `padding ${chip?.pad}px, margin ${chip?.left}/${chip?.right}px`);
+
+  // Markdown says a single newline in a paragraph is a space.
+  check("a soft-wrapped paragraph reflows into one line",
+    sentence.startsWith("This is a pnpm") && sentence.endsWith("(package @scope/assess-skill)."),
+    `${sentence.length} chars across what were four source lines`);
+  check("a two-space hard break stays a break", cl.some((l) => l.trim() === "so this stays on its own line."));
+  check("a backslash hard break stays a break", cl.some((l) => l.trim() === "like this."));
+  check("a quoted paragraph reflows too", cl.some((l) => l.includes("A quoted paragraph spanning two source lines.")));
+  check("a wrapped list item reflows without its indent", cl.some((l) => l.includes("A list item that is wrapped across two lines.")),
+    JSON.stringify(cl.find((l) => l.includes("list item"))));
+  check("a code fence keeps its line breaks", cl.some((l) => l.trim() === "code fences keep"));
+
+  // The caret snaps the paragraph back to its source lines.
+  await clickLine(code, page, "pnpm workspace");
+  await page.waitForTimeout(600);
+  cl = await codeLines();
+  check("the caret un-reflows its paragraph", cl.some((l) => l.endsWith("apps/portal")), JSON.stringify(cl.find((l) => l.includes("pnpm workspace"))?.slice(0, 70)));
+  check("other paragraphs stay reflowed", cl.some((l) => l.includes("A quoted paragraph spanning")));
+
   console.log("\n— GitHub alerts —");
   await runCommand(page, "View: Close All Editors");
   await page.waitForTimeout(1200);
@@ -211,7 +256,9 @@ try {
   // written in prose, which must stay exactly as written.
   const markerLine = () =>
     alerts.evaluate(() => document.querySelector(".cm-alert-open")?.textContent ?? "");
-  check("the marker reads as a name away from the caret", (await markerLine()).startsWith("Note"), JSON.stringify(await markerLine()));
+  // An alert's marker is a title, not the first words of the sentence below it,
+  // so reflow must not join it to the body.
+  check("the marker reads as a name on its own line", (await markerLine()).trim() === "Note", JSON.stringify(await markerLine()));
 
   await clickLine(alerts, page, "Useful information");
   await page.keyboard.press("ArrowUp");

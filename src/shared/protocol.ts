@@ -49,6 +49,7 @@ export interface WebviewConfig {
   /** A CSS length, or "none" for full width. */
   readingMeasure: string | null;
   livePreview: boolean;
+  reflow: boolean;
   renderTables: boolean;
   showFrontmatter: boolean;
 }
