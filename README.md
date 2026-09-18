@@ -10,7 +10,7 @@ Built on CodeMirror 6. Runs in VS Code desktop and in the browser
 ![Markdown Hybrid Editor](demo/out/walkthrough.gif)
 
 *A note reads as prose; the line under the caret shows its markdown.*
-[Full walkthrough (3 min)](demo/out/walkthrough.mp4)
+[Full walkthrough (4 min)](demo/out/walkthrough.mp4)
 
 > **Status:** early. The editor works and is covered by automated gates, but it
 > has not been through a release yet.
