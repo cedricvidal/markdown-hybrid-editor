@@ -58,11 +58,9 @@ try {
   check("undo removes the typing", !afterUndo?.includes("Hello from the"), `${steps} step(s)`);
   check("undo granularity is per burst, not per keystroke", steps >= 1 && steps <= 8, `${steps} steps for 29 chars`);
   check("undo did not empty the document", (afterUndo ?? "").includes("A note that reads like prose"));
-  check(
-    "undo landed back on the original text",
-    (afterUndo ?? "").trimEnd().endsWith("This is a *view*, not a format."),
-    JSON.stringify((afterUndo ?? "").slice(-50)),
-  );
+  // Compare with the text captured before typing, not a literal: live preview
+  // means the rendered text depends on where the caret is.
+  check("undo landed back on the original text", afterUndo === original, JSON.stringify((afterUndo ?? "").slice(-50)));
 
   // Redo has the same granularity as undo, so it takes the same number of steps.
   for (let i = 0; i < steps; i++) {
