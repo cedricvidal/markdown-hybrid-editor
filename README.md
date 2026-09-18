@@ -128,6 +128,20 @@ src/webview/   The browser half: mounts the editor, batches edits.
 src/shared/    Types and helpers both bundles use.
 ```
 
+## Before publishing
+
+`vsce` rewrites the README's relative image links to absolute ones, which it can
+only do once it knows where the extension lives. Add a `repository` field to
+`package.json`, or pass the base URLs:
+
+```bash
+VSCE_BASE_IMAGES_URL=https://raw.githubusercontent.com/<user>/markdown-hybrid-editor/main \
+VSCE_BASE_CONTENT_URL=https://github.com/<user>/markdown-hybrid-editor/blob/main \
+pnpm package
+```
+
+The Marketplace strips `<video>`, so the GIF is what moves in the listing.
+
 ## Licence
 
 MIT © 2026 Cedric Vidal

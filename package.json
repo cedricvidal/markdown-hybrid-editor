@@ -272,7 +272,7 @@
     "build": "node esbuild.mjs --production",
     "watch": "node esbuild.mjs --watch",
     "typecheck": "tsc --noEmit -p tsconfig.host.json && tsc --noEmit -p tsconfig.web.json && tsc --noEmit -p tsconfig.webview.json",
-    "package": "pnpm typecheck && pnpm build && vsce package --no-dependencies",
+    "package": "pnpm verify && vsce package --no-dependencies ${VSCE_BASE_IMAGES_URL:+--baseImagesUrl $VSCE_BASE_IMAGES_URL} ${VSCE_BASE_CONTENT_URL:+--baseContentUrl $VSCE_BASE_CONTENT_URL}",
     "demo:smoke": "node demo/smoke.mjs",
     "demo:m2": "node demo/m2.mjs",
     "demo:web": "node demo/web.mjs",
