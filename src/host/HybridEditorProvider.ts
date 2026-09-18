@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import type { WebviewMessage } from "../shared/protocol";
-import { getHtml, makeNonce } from "./html";
-import { readConfig, SECTION, setShowFrontmatter } from "./config";
+import { getHtml, getTooLargeHtml, makeNonce } from "./html";
+import { maxFileSize, readConfig, SECTION, setShowFrontmatter } from "./config";
 import { DocumentSync } from "./DocumentSync";
 import { EditorSession } from "./EditorSession";
 import { validateChanges } from "./positions";
@@ -44,6 +44,26 @@ export class HybridEditorProvider implements vscode.CustomTextEditorProvider {
 
   resolveCustomTextEditor(document: vscode.TextDocument, panel: vscode.WebviewPanel): void {
     const nonce = makeNonce();
+
+    const limit = maxFileSize();
+    const size = document.getText().length;
+    if (size > limit) {
+      panel.webview.options = {
+        enableScripts: true,
+        enableForms: false,
+        enableCommandUris: false,
+        localResourceRoots: [vscode.Uri.joinPath(this.context.extensionUri, "dist")],
+      };
+      panel.webview.html = getTooLargeHtml(panel.webview, nonce, size, limit);
+      const listener = panel.webview.onDidReceiveMessage((raw: unknown) => {
+        if (typeof raw === "object" && raw !== null && (raw as { type?: string }).type === "openWithTextEditor") {
+          void vscode.commands.executeCommand("vscode.openWith", document.uri, "default");
+        }
+      });
+      panel.onDidDispose(() => listener.dispose());
+      return;
+    }
+
     const session = new EditorSession(panel, nonce);
     const sync = DocumentSync.acquire(document, session);
 

@@ -2,6 +2,7 @@ node_modules/
 dist/
 out/
 .vscode-test/
+.vscode-test-web/
 *.vsix
 
 # Recording harness: frames are transient, rebuilt on every run.

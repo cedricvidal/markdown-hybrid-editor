@@ -67,3 +67,42 @@ export function getHtml(
 </body>
 </html>`;
 }
+
+/**
+ * Shown instead of the editor for a document large enough that the live preview
+ * would make typing crawl. An honest bail-out beats a hung tab.
+ */
+export function getTooLargeHtml(webview: vscode.Webview, nonce: string, bytes: number, limit: number): string {
+  const mb = (n: number) => `${(n / 1_000_000).toFixed(1)} MB`;
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="${csp(nonce, webview.cspSource)}">
+<style nonce="${nonce}">
+  body { margin: 0; height: 100vh; display: grid; place-items: center;
+         background: var(--vscode-editor-background); color: var(--vscode-editor-foreground);
+         font-family: var(--vscode-font-family); font-size: var(--vscode-font-size); }
+  .card { max-width: 44ch; text-align: center; line-height: 1.5; padding: 24px; }
+  h1 { font-size: 1.15em; margin: 0 0 8px; }
+  p { color: var(--vscode-descriptionForeground); margin: 0 0 16px; }
+  button { font: inherit; padding: 6px 14px; border: 0; border-radius: 2px; cursor: pointer;
+           background: var(--vscode-button-background); color: var(--vscode-button-foreground); }
+  button:hover { background: var(--vscode-button-hoverBackground); }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>This note is too large for the hybrid editor</h1>
+  <p>It is ${mb(bytes)}, past the ${mb(limit)} limit. Rendering tables and hiding
+     markup means re-reading the whole document as you type, which would make
+     editing crawl. The plain text editor handles it comfortably.</p>
+  <button id="open">Open in Text Editor</button>
+</div>
+<script nonce="${nonce}">
+  const api = acquireVsCodeApi();
+  document.getElementById("open").addEventListener("click", () => api.postMessage({ type: "openWithTextEditor" }));
+</script>
+</body>
+</html>`;
+}

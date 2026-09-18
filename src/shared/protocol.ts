@@ -84,4 +84,5 @@ export type WebviewMessage =
   | { type: "selection"; selection: WireSelection; line: number; column: number; words: number }
   /** The reveal affordance on the collapsed frontmatter strip was used. */
   | { type: "setShowFrontmatter"; show: boolean }
+  | { type: "openWithTextEditor" }
   | { type: "error"; message: string };

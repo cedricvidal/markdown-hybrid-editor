@@ -39,6 +39,11 @@ export function readConfig(nonce: string): WebviewConfig {
   };
 }
 
+/** Documents past this are opened with a notice instead of the editor. */
+export function maxFileSize(): number {
+  return vscode.workspace.getConfiguration(SECTION).get<number>("maxFileSize", 1_500_000);
+}
+
 /** Flip the global frontmatter preference. */
 export async function setShowFrontmatter(show: boolean): Promise<void> {
   await vscode.workspace
