@@ -136,3 +136,39 @@ export const reflow = StateField.define<DecorationSet>({
       : value,
   provide: (field) => EditorView.decorations.from(field),
 });
+
+/**
+ * True when this document line belongs to a paragraph that reflow has joined,
+ * and therefore reads as part of one block rather than a line of its own.
+ */
+export const revealByParagraph = Facet.define<boolean, boolean>({
+  combine: (values) => values[0] ?? false,
+});
+
+/**
+ * The line range of the joined paragraph containing `lineNumber`, or null when
+ * that line stands on its own. Used to decide how much markup to reveal: the
+ * unit has to be what the reader sees, and once lines are joined that is the
+ * paragraph, not the line.
+ */
+export function joinedParagraphAt(state: EditorState, lineNumber: number): { first: number; last: number } | null {
+  if (state.doc.length > MAX_REFLOW_DOC) return null;
+  const line = state.doc.line(lineNumber);
+
+  let node = syntaxTree(state).resolveInner(line.from, 1);
+  while (node.parent && node.name !== "Paragraph") node = node.parent;
+  if (node.name !== "Paragraph") return null;
+
+  const first = state.doc.lineAt(node.from).number;
+  const last = state.doc.lineAt(Math.max(node.from, node.to - 1)).number;
+  if (first === last) return null;
+
+  // A paragraph broken only by hard breaks is never joined, so its lines stay
+  // lines and revealing one of them is right.
+  for (let i = first; i < last; i++) {
+    if (!HARD_BREAK.test(state.doc.line(i).text) && !alertKind(state.doc.line(i).text)) {
+      return { first, last };
+    }
+  }
+  return null;
+}

@@ -78,6 +78,8 @@ our own echo.
 | Git | `.gitignore` uses `/out/`, not `out/` — the latter also swallows `demo/out/`. |
 | Packaging | `vsce` refuses a README with non-HTTPS images and derives the base from a `repository` field this project does not have yet, so `dev:install` passes a placeholder. Add `repository` before publishing. |
 | Markdown | A frontmatter block's closing `---` makes the last YAML line look exactly like a setext H2. Anything scanning for headings must skip the block. |
+| CodeMirror | A decoration that replaces a **line break** must come from a `StateField`, never a ViewPlugin — line layout cannot depend on the viewport. Same constraint as block widgets. |
+| Design | The unit of "what the caret is on" is what the *reader* sees, not what the document holds. Once reflow joins a paragraph's lines, markup must reveal for the whole paragraph; revealing one source line leaves a patch of raw markdown mid-prose. |
 
 ## Conventions
 

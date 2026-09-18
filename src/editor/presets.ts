@@ -6,7 +6,7 @@ import type { Extension } from "@codemirror/state";
 import { editorTheme, hybridHighlight } from "./theme";
 import { livePreview, tables } from "./livePreview";
 import { frontmatterVisibility } from "./frontmatterVisibility";
-import { reflow, softBreakMode, type SoftBreakMode } from "./reflow";
+import { reflow, revealByParagraph, softBreakMode, type SoftBreakMode } from "./reflow";
 
 export interface ReadingOptions {
   livePreview: boolean;
@@ -34,7 +34,15 @@ export function readingExtensions(options: ReadingOptions): Extension[] {
     yamlFrontmatter({ content: markdown({ base: markdownLanguage }) }),
     syntaxHighlighting(hybridHighlight),
     ...(options.livePreview ? [livePreview] : []),
-    ...(options.reflow ? [softBreakMode.of(options.softBreaks), reflow] : []),
+    ...(options.reflow
+      ? [
+          softBreakMode.of(options.softBreaks),
+          // Only `mark` keeps the paragraph joined while editing it; `unwrap`
+          // puts the lines back, so the line is the right unit again.
+          revealByParagraph.of(options.softBreaks === "mark"),
+          reflow,
+        ]
+      : []),
     ...(options.renderTables ? tables : []),
     frontmatterVisibility(options.showFrontmatter, options.frontmatterHint),
     editorTheme,

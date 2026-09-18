@@ -24,8 +24,8 @@ Built on CodeMirror 6. Runs in VS Code desktop and in the browser
   markdown, so a file hand-wrapped at 80 columns reads as flowing prose rather
   than ragged fragments. Edit a paragraph and each break shows as a quiet `↵`
   rather than the text springing back onto its source lines — you see where your
-  newlines are without anything moving under the caret. Hard breaks, code fences
-  and tables keep their breaks.
+  newlines are without anything moving under the caret, and the paragraph shows
+  its markup as a whole. Hard breaks, code fences and tables keep their breaks.
 - **Links collapse to their text.** `[label](https://…)` reads as *label*; a bare
   `[label]` with no URL, like `app[bot]`, is left alone.
 - **GitHub alerts** — `> [!NOTE]`, `[!TIP]`, `[!IMPORTANT]`, `[!WARNING]`,

@@ -206,6 +206,19 @@ try {
   check("the paragraph stays joined while editing",
     editing.includes("This is a") && editing.includes("assess-skill"),
     `${editing.length} chars, was ${flowed.length}`);
+
+  // Once lines are joined the reader sees a paragraph, not lines — so the
+  // markup reveals for the whole paragraph rather than leaving a patch of raw
+  // markdown in the middle of rendered prose.
+  check("markup reveals for the whole paragraph",
+    editing.includes("**pnpm workspace monorepo**") && editing.includes("`@scope/assess-skill`"),
+    JSON.stringify(editing.slice(0, 60)));
+
+  const beforeMove = editing;
+  await page.keyboard.press("ArrowDown");
+  await page.waitForTimeout(500);
+  check("moving the caret inside it changes nothing",
+    (await codeLines()).find((l) => l.includes("pnpm workspace")) === beforeMove);
   check("other paragraphs are untouched", cl.some((l) => l.includes("A quoted paragraph spanning")));
 
   // The other mode puts the source lines back instead.

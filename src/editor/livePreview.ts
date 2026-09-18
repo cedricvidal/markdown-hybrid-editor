@@ -9,6 +9,7 @@ import { Decoration, EditorView, ViewPlugin, type DecorationSet, type ViewUpdate
 import { rowLine, TableWidget } from "./tableWidget";
 import { FrontmatterFold } from "./frontmatterVisibility";
 import { AlertTitle, alertKind, markerSpan, type AlertKind } from "./alerts";
+import { joinedParagraphAt, revealByParagraph } from "./reflow";
 
 const HIDE = new Set(["HeaderMark", "EmphasisMark", "CodeMark", "StrikethroughMark", "QuoteMark"]);
 
@@ -86,6 +87,18 @@ export function buildDecorations(state: EditorState, ranges: readonly { from: nu
     const first = state.doc.lineAt(range.from).number;
     const last = state.doc.lineAt(range.to).number;
     for (let i = first; i <= last; i++) cursorLines.add(i);
+  }
+
+  // Where soft breaks have been joined, the reader sees a paragraph rather than
+  // lines — so reveal the markup of the whole paragraph. Revealing one source
+  // line of a flowing paragraph leaves a patch of raw markdown in the middle of
+  // rendered prose, which reads as a glitch rather than as the source.
+  if (state.facet(revealByParagraph)) {
+    for (const lineNumber of [...cursorLines]) {
+      const paragraph = joinedParagraphAt(state, lineNumber);
+      if (!paragraph) continue;
+      for (let i = paragraph.first; i <= paragraph.last; i++) cursorLines.add(i);
+    }
   }
 
   const tree = syntaxTree(state);
