@@ -204,6 +204,19 @@
           "type": "boolean",
           "default": true,
           "markdownDescription": "Join soft-wrapped lines within a paragraph, the way markdown renders them — a single newline is a space. The paragraph under the caret snaps back to its source lines. Turn off to keep every source line on its own line."
+        },
+        "markdownHybridEditor.softBreaks": {
+          "type": "string",
+          "enum": [
+            "mark",
+            "unwrap"
+          ],
+          "default": "mark",
+          "enumDescriptions": [
+            "Keep the paragraph flowing and show a ↵ where each break is, so nothing moves as you type.",
+            "Put the paragraph back on its source lines while the caret is in it."
+          ],
+          "markdownDescription": "What a soft line break does while you are editing its paragraph. Only applies when `#markdownHybridEditor.reflowParagraphs#` is on."
         }
       }
     },

@@ -193,12 +193,34 @@ try {
     JSON.stringify(cl.find((l) => l.includes("list item"))));
   check("a code fence keeps its line breaks", cl.some((l) => l.trim() === "code fences keep"));
 
-  // The caret snaps the paragraph back to its source lines.
+  // Editing the paragraph: by default the breaks become visible and nothing moves.
+  const flowed = cl.find((l) => l.includes("pnpm workspace")) ?? "";
   await clickLine(code, page, "pnpm workspace");
-  await page.waitForTimeout(600);
+  await page.waitForTimeout(700);
   cl = await codeLines();
-  check("the caret un-reflows its paragraph", cl.some((l) => l.endsWith("apps/portal")), JSON.stringify(cl.find((l) => l.includes("pnpm workspace"))?.slice(0, 70)));
-  check("other paragraphs stay reflowed", cl.some((l) => l.includes("A quoted paragraph spanning")));
+  const editing = cl.find((l) => l.includes("pnpm workspace")) ?? "";
+  const marks = (await code.$$(".cm-softbreak-marked")).length;
+  check("editing marks the breaks rather than restoring the lines", marks === 3, `${marks} markers`);
+  // Still one joined line rather than four source lines. Character counts differ
+  // because the caret's own line reveals its markup, which is a separate rule.
+  check("the paragraph stays joined while editing",
+    editing.includes("This is a") && editing.includes("assess-skill"),
+    `${editing.length} chars, was ${flowed.length}`);
+  check("other paragraphs are untouched", cl.some((l) => l.includes("A quoted paragraph spanning")));
+
+  // The other mode puts the source lines back instead.
+  await session.setSettings({ "markdownHybridEditor.softBreaks": "unwrap" });
+  await page.waitForTimeout(900);
+  await clickLine(code, page, "pnpm workspace");
+  await page.waitForTimeout(700);
+  cl = await codeLines();
+  const unwrapped = cl.find((l) => l.includes("pnpm workspace")) ?? "";
+  check("unwrap splits the paragraph back into source lines",
+    unwrapped.includes("This is a") && !unwrapped.includes("assess-skill"),
+    JSON.stringify(unwrapped.slice(0, 66)));
+  check("unwrap shows no break markers", (await code.$$(".cm-softbreak-marked")).length === 0);
+  await session.setSettings({ "markdownHybridEditor.softBreaks": "mark" });
+  await page.waitForTimeout(800);
 
   console.log("\n— GitHub alerts —");
   await runCommand(page, "View: Close All Editors");

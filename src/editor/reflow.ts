@@ -16,7 +16,7 @@
  * are refused: the line layout cannot depend on the viewport.
  */
 import { syntaxTree } from "@codemirror/language";
-import { StateField, type EditorState, type Range } from "@codemirror/state";
+import { Facet, StateField, type EditorState, type Range } from "@codemirror/state";
 import { Decoration, EditorView, WidgetType, type DecorationSet } from "@codemirror/view";
 import { alertKind } from "./alerts";
 
@@ -29,15 +29,25 @@ const HARD_BREAK = / {2,}$|\\$/;
 /** Blocks whose line breaks are meaningful and must be left alone. */
 const KEEP_BREAKS = new Set(["FencedCode", "CodeBlock", "Table", "Frontmatter", "HTMLBlock"]);
 
+/**
+ * Stands in for the newline. Reading, it is just the space markdown says it is;
+ * editing the paragraph, it shows the break so you can see where your lines
+ * actually end — without the text relayouting under the caret, which is what
+ * restoring the source lines would cost.
+ */
 class SoftBreak extends WidgetType {
-  override eq() {
-    return true;
+  constructor(readonly marked: boolean) {
+    super();
+  }
+
+  override eq(other: SoftBreak) {
+    return other.marked === this.marked;
   }
 
   override toDOM() {
     const span = document.createElement("span");
-    span.className = "cm-softbreak";
-    span.textContent = " ";
+    span.className = this.marked ? "cm-softbreak cm-softbreak-marked" : "cm-softbreak";
+    span.textContent = this.marked ? "\u21a9" : " ";
     return span;
   }
 
@@ -47,10 +57,24 @@ class SoftBreak extends WidgetType {
   }
 }
 
-const softBreak = Decoration.replace({ widget: new SoftBreak() });
+const softBreakPlain = Decoration.replace({ widget: new SoftBreak(false) });
+const softBreakMarked = Decoration.replace({ widget: new SoftBreak(true) });
+
+/**
+ * What a soft break does when the caret is inside its paragraph.
+ *
+ * - `mark`   keep it flowing and show a break glyph, so nothing moves.
+ * - `unwrap` put the paragraph back on its source lines.
+ */
+export type SoftBreakMode = "mark" | "unwrap";
+
+export const softBreakMode = Facet.define<SoftBreakMode, SoftBreakMode>({
+  combine: (values) => values[0] ?? "mark",
+});
 
 export function buildReflow(state: EditorState): DecorationSet {
   if (state.doc.length > MAX_REFLOW_DOC) return Decoration.none;
+  const mode = state.facet(softBreakMode);
 
   // Every line the selection touches, plus the paragraph containing it, is left
   // as written — so the whole paragraph un-reflows together rather than a single
@@ -74,9 +98,12 @@ export function buildReflow(state: EditorState): DecorationSet {
       const last = state.doc.lineAt(node.to).number;
       if (first === last) return false;
 
-      for (let i = first; i <= last; i++) {
-        if (caretLines.has(i)) return false; // the caret is in this paragraph
-      }
+      let editing = false;
+      for (let i = first; i <= last; i++) if (caretLines.has(i)) editing = true;
+      // In `unwrap` the paragraph goes back to its source lines; in `mark` it
+      // keeps flowing and the breaks become visible instead.
+      if (editing && mode === "unwrap") return false;
+      const deco = editing ? softBreakMarked : softBreakPlain;
 
       for (let i = first; i < last; i++) {
         const line = state.doc.line(i);
@@ -92,7 +119,7 @@ export function buildReflow(state: EditorState): DecorationSet {
         // indent is layout for the source, not a run of spaces in the sentence.
         const next = state.doc.line(i + 1);
         const indent = /^[ \t]*/.exec(next.text)?.[0].length ?? 0;
-        ranges.push(softBreak.range(line.to, next.from + indent));
+        ranges.push(deco.range(line.to, next.from + indent));
       }
       return false;
     },

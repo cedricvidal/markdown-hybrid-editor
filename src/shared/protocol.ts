@@ -50,6 +50,7 @@ export interface WebviewConfig {
   readingMeasure: string | null;
   livePreview: boolean;
   reflow: boolean;
+  softBreaks: "mark" | "unwrap";
   renderTables: boolean;
   showFrontmatter: boolean;
 }

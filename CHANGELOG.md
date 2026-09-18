@@ -10,8 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Hybrid markdown editing: marks hide on every line the caret is not on.
-- Soft line breaks reflow within a paragraph, as markdown renders them; the
-  paragraph under the caret snaps back to its source lines.
+- Soft line breaks reflow within a paragraph, as markdown renders them. Editing
+  a paragraph marks its breaks with a `↵` instead of relayouting the text;
+  `markdownHybridEditor.softBreaks` can restore the old source-line behaviour.
 - GitHub alerts (`[!NOTE]`, `[!TIP]`, `[!IMPORTANT]`, `[!WARNING]`, `[!CAUTION]`)
   rendered as marked passages in the theme's own colours.
 - GFM tables rendered as tables, editable cell by cell.

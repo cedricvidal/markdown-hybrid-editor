@@ -404,3 +404,13 @@ body.vscode-light .cm-alert-close,
 body.vscode-high-contrast-light .cm-alert-close {
   background-size: 4px calc(100% - 6px);
 }
+
+/* The soft break, made visible while its paragraph is being edited. Quiet
+   enough to read past, clear enough to count. */
+.cm-softbreak-marked {
+  color: var(--muted);
+  opacity: 0.55;
+  font-size: 0.8em;
+  padding: 0 0.28em;
+  vertical-align: 0.05em;
+}

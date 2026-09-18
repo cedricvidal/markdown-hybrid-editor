@@ -6,12 +6,14 @@ import type { Extension } from "@codemirror/state";
 import { editorTheme, hybridHighlight } from "./theme";
 import { livePreview, tables } from "./livePreview";
 import { frontmatterVisibility } from "./frontmatterVisibility";
-import { reflow } from "./reflow";
+import { reflow, softBreakMode, type SoftBreakMode } from "./reflow";
 
 export interface ReadingOptions {
   livePreview: boolean;
   /** Join soft-wrapped paragraph lines, as a markdown renderer does. */
   reflow: boolean;
+  /** What a soft break does while its paragraph is being edited. */
+  softBreaks: SoftBreakMode;
   renderTables: boolean;
   showFrontmatter: boolean;
   /** Shown on the collapsed frontmatter strip, e.g. the real keybinding. */
@@ -32,7 +34,7 @@ export function readingExtensions(options: ReadingOptions): Extension[] {
     yamlFrontmatter({ content: markdown({ base: markdownLanguage }) }),
     syntaxHighlighting(hybridHighlight),
     ...(options.livePreview ? [livePreview] : []),
-    ...(options.reflow ? [reflow] : []),
+    ...(options.reflow ? [softBreakMode.of(options.softBreaks), reflow] : []),
     ...(options.renderTables ? tables : []),
     frontmatterVisibility(options.showFrontmatter, options.frontmatterHint),
     editorTheme,

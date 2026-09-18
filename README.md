@@ -22,8 +22,10 @@ Built on CodeMirror 6. Runs in VS Code desktop and in the browser
   straight back on the line you are editing.
 - **Soft breaks reflow.** A single newline inside a paragraph is a space in
   markdown, so a file hand-wrapped at 80 columns reads as flowing prose rather
-  than ragged fragments. Put the caret in a paragraph and it snaps back to its
-  real source lines. Hard breaks, code fences and tables keep their breaks.
+  than ragged fragments. Edit a paragraph and each break shows as a quiet `↵`
+  rather than the text springing back onto its source lines — you see where your
+  newlines are without anything moving under the caret. Hard breaks, code fences
+  and tables keep their breaks.
 - **Links collapse to their text.** `[label](https://…)` reads as *label*; a bare
   `[label]` with no URL, like `app[bot]`, is left alone.
 - **GitHub alerts** — `> [!NOTE]`, `[!TIP]`, `[!IMPORTANT]`, `[!WARNING]`,

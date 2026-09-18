@@ -33,6 +33,7 @@ export function readConfig(nonce: string): WebviewConfig {
     readingMeasure: readingMeasure ? readingMeasure : null,
     livePreview: cfg.get<boolean>("livePreview.enabled", true),
     reflow: cfg.get<boolean>("reflowParagraphs", true),
+    softBreaks: cfg.get<string>("softBreaks", "mark") === "unwrap" ? "unwrap" : "mark",
     renderTables: cfg.get<boolean>("tables.render", true),
     // One global preference, matching the desktop original: toggling it applies
     // to every open hybrid editor at once.

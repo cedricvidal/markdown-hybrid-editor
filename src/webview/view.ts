@@ -38,6 +38,7 @@ function configExtensions(config: WebviewConfig): Extension {
     ...readingExtensions({
       livePreview: config.livePreview,
       reflow: config.reflow,
+      softBreaks: config.softBreaks,
       renderTables: config.renderTables,
       showFrontmatter: config.showFrontmatter,
       frontmatterHint: frontmatterHintText(),
