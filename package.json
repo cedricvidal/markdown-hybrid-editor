@@ -289,8 +289,8 @@
     "demo:record": "node demo/record.mjs",
     "demo:video": "bash demo/build-video.sh",
     "demo:gif": "bash demo/build-gif.sh",
-    "dev:link": "node -e \"const{symlinkSync,mkdirSync}=require('fs'),{join}=require('path'),d=join(require('os').homedir(),'.vscode/extensions','markdown-hybrid-editor');mkdirSync(join(require('os').homedir(),'.vscode/extensions'),{recursive:true});try{symlinkSync(process.cwd(),d,'dir');console.log('linked ->',d)}catch(e){console.log(e.code==='EEXIST'?'already linked':e.message)}\"",
-    "dev:unlink": "node -e \"const{unlinkSync}=require('fs'),{join}=require('path'),d=join(require('os').homedir(),'.vscode/extensions','markdown-hybrid-editor');try{unlinkSync(d);console.log('unlinked')}catch(e){console.log(e.code==='ENOENT'?'not linked':e.message)}\""
+    "dev:install": "pnpm build && vsce package --no-dependencies --allow-missing-repository --baseImagesUrl ${MHE_REPO_RAW_URL:-https://example.com/markdown-hybrid-editor} --baseContentUrl ${MHE_REPO_URL:-https://example.com/markdown-hybrid-editor} -o .vsix-build.vsix && code --install-extension .vsix-build.vsix --force && rm -f .vsix-build.vsix",
+    "dev:sync": "pnpm build && node -e \"const{cpSync,existsSync,readdirSync}=require('fs'),{join}=require('path'),d=join(require('os').homedir(),'.vscode/extensions'),m=readdirSync(d).find(n=>n.startsWith('cedricvidal.markdown-hybrid-editor-'));if(!m){console.error('not installed — run pnpm dev:install first');process.exit(1)}cpSync('dist',join(d,m,'dist'),{recursive:true});cpSync('package.json',join(d,m,'package.json'));console.log('synced to',m,'— now run Developer: Reload Window')\""
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

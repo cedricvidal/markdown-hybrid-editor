@@ -105,72 +105,32 @@ pnpm dev:web     # run it in a browser
 
 ### Using it in your own VS Code
 
-Link the checkout into your extensions folder, so improvements land without
-reinstalling anything:
-
 ```bash
-pnpm build
-pnpm dev:link    # symlink into ~/.vscode/extensions
+pnpm dev:install   # build, package, install into VS Code
 ```
 
-Then restart VS Code once. From there the loop is:
+Restart VS Code once. After that, the loop for each change is:
 
 ```bash
-pnpm watch       # rebuild on save
+pnpm dev:sync      # rebuild and copy into the installed extension
 ```
 
-…and **Developer: Reload Window** (<kbd>⌘R</kbd>) picks up each change. Host-side
-changes need the reload; webview-only changes need only the tab reopened.
+…then **Developer: Reload Window** (<kbd>⌘R</kbd>). Host-side changes need the
+reload; webview-only changes need only the tab reopened.
 
-`pnpm dev:unlink` removes it again. Note that `.md` files open in this editor by
-default once it is loaded — see [Turning it off](#turning-it-off).
+> [!NOTE]
+> A symlink in `~/.vscode/extensions` does **not** work. VS Code only loads
+> extensions listed in that folder's `extensions.json`, which the installer
+> writes — a hand-made folder or link there is ignored silently.
+
+Note that `.md` files open in this editor once it is loaded — see
+[Turning it off](#turning-it-off). `code --uninstall-extension
+cedricvidal.markdown-hybrid-editor` removes it.
 
 ### A separate window instead
 
 `pnpm watch`, then <kbd>F5</kbd>, which launches an Extension Development Host
 with the extension loaded and leaves your own VS Code untouched.
-
-`pnpm demo:gates` drives a real VS Code through Playwright and checks each
-milestone end to end — typing reaches disk, undo is per burst not per keystroke,
-two views of one document stay in step, CRLF survives a round trip, and a note
-full of hostile markup executes nothing.
-
-```bash
-pnpm demo:record   # drive VS Code through the walkthrough, off-screen
-pnpm demo:video    # frames -> walkthrough.mp4
-pnpm demo:gif      # the first 34s as a GIF, for the README
-```
-
-The walkthrough doubles as acceptance evidence: every beat is a milestone gate,
-so a green recording shows the features working rather than just rendering. It
-records with the window parked off-screen — the screencast captures the
-renderer, not the screen — so a three-minute run does not sit in front of
-whatever else is happening. `MHE_FOREGROUND=1` shows it live while editing beats.
-
-### Layout
-
-```
-src/editor/    CodeMirror only. Imports neither vscode nor the webview, so it is
-               testable against a bare EditorState. Enforced by lint.
-src/host/      The extension host. No Node builtins, so it also runs as a Web
-               Worker in vscode.dev. Enforced by lint and a second tsconfig.
-src/webview/   The browser half: mounts the editor, batches edits.
-src/shared/    Types and helpers both bundles use.
-```
-
-## Before publishing
-
-`vsce` rewrites the README's relative image links to absolute ones, which it can
-only do once it knows where the extension lives. Add a `repository` field to
-`package.json`, or pass the base URLs:
-
-```bash
-VSCE_BASE_IMAGES_URL=https://raw.githubusercontent.com/<user>/markdown-hybrid-editor/main \
-VSCE_BASE_CONTENT_URL=https://github.com/<user>/markdown-hybrid-editor/blob/main \
-pnpm package
-```
-
-The Marketplace strips `<video>`, so the GIF is what moves in the listing.
 
 ## Licence
 
