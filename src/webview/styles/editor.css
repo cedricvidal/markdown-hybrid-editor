@@ -1,0 +1,12 @@
+/* Live-preview visuals. Filled in as the decorations land (M1/M3/M4). */
+
+.mhe-raw {
+  margin: 0;
+  padding: 16px 40px;
+  max-width: var(--editor-measure);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+}

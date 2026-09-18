@@ -1,0 +1,75 @@
+/*
+ * The theme bridge. VS Code injects every theme colour as --vscode-<id>, so
+ * pointing our own token names at those makes theme switching work with no
+ * reload and no event handling — every colour below is a var() reference.
+ */
+:root {
+  --ink: var(--vscode-editor-background);
+  --panel: var(--vscode-editorWidget-background, var(--vscode-editor-background));
+  --raised: var(--vscode-textCodeBlock-background, var(--vscode-editorWidget-background));
+  --line: var(--vscode-editorWidget-border, var(--vscode-panel-border, transparent));
+
+  --text: var(--vscode-editor-foreground, var(--vscode-foreground));
+  --muted: var(--vscode-descriptionForeground, var(--vscode-disabledForeground));
+
+  --accent: var(--vscode-textLink-foreground);
+  --accent-soft: color-mix(in srgb, var(--vscode-textLink-foreground) 22%, transparent);
+  --accent-glow: color-mix(in srgb, var(--vscode-textLink-foreground) 45%, transparent);
+  --danger: var(--vscode-errorForeground);
+
+  --font-ui: var(--vscode-font-family);
+  --ui-size: var(--vscode-font-size);
+  --font-mono: var(--vscode-editor-font-family);
+  --font-serif: ui-serif, Georgia, "Iowan Old Style", "Source Serif 4", "Times New Roman", serif;
+
+  --editor-size: 17px;
+  --editor-line: 1.6;
+  --editor-measure: 68ch;
+
+  --radius: 4px;
+  --radius-pop: 6px;
+  --shadow-pop: 0 2px 8px var(--vscode-widget-shadow, rgba(0, 0, 0, 0.35));
+
+  --dur: 160ms;
+  --dur-fast: 120ms;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* "Pure VS Code" typography: the editor's own font, no reading measure. */
+:root[data-typography="vscode"] {
+  --font-serif: var(--vscode-editor-font-family);
+  --editor-size: var(--vscode-editor-font-size);
+  --editor-line: 1.5;
+  --editor-measure: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur: 0ms;
+    --dur-fast: 0ms;
+  }
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--ink);
+  color: var(--text);
+}
+
+body {
+  font-family: var(--font-ui);
+  font-size: var(--ui-size);
+}
+
+#root {
+  height: 100%;
+}
+
+/* Stands in for the editor until the view mounts, so there is no white flash. */
+.mhe-skeleton {
+  height: 100%;
+  background: var(--ink);
+}
