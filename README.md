@@ -100,9 +100,35 @@ anything.
 ```bash
 pnpm install
 pnpm verify      # lint, typecheck, unit tests, build
-pnpm watch       # then F5 in VS Code
 pnpm dev:web     # run it in a browser
 ```
+
+### Using it in your own VS Code
+
+Link the checkout into your extensions folder, so improvements land without
+reinstalling anything:
+
+```bash
+pnpm build
+pnpm dev:link    # symlink into ~/.vscode/extensions
+```
+
+Then restart VS Code once. From there the loop is:
+
+```bash
+pnpm watch       # rebuild on save
+```
+
+…and **Developer: Reload Window** (<kbd>⌘R</kbd>) picks up each change. Host-side
+changes need the reload; webview-only changes need only the tab reopened.
+
+`pnpm dev:unlink` removes it again. Note that `.md` files open in this editor by
+default once it is loaded — see [Turning it off](#turning-it-off).
+
+### A separate window instead
+
+`pnpm watch`, then <kbd>F5</kbd>, which launches an Extension Development Host
+with the extension loaded and leaves your own VS Code untouched.
 
 `pnpm demo:gates` drives a real VS Code through Playwright and checks each
 milestone end to end — typing reaches disk, undo is per burst not per keystroke,

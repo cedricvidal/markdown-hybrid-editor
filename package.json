@@ -288,7 +288,9 @@
     "demo:security": "node demo/security.mjs",
     "demo:record": "node demo/record.mjs",
     "demo:video": "bash demo/build-video.sh",
-    "demo:gif": "bash demo/build-gif.sh"
+    "demo:gif": "bash demo/build-gif.sh",
+    "dev:link": "node -e \"const{symlinkSync,mkdirSync}=require('fs'),{join}=require('path'),d=join(require('os').homedir(),'.vscode/extensions','markdown-hybrid-editor');mkdirSync(join(require('os').homedir(),'.vscode/extensions'),{recursive:true});try{symlinkSync(process.cwd(),d,'dir');console.log('linked ->',d)}catch(e){console.log(e.code==='EEXIST'?'already linked':e.message)}\"",
+    "dev:unlink": "node -e \"const{unlinkSync}=require('fs'),{join}=require('path'),d=join(require('os').homedir(),'.vscode/extensions','markdown-hybrid-editor');try{unlinkSync(d);console.log('unlinked')}catch(e){console.log(e.code==='ENOENT'?'not linked':e.message)}\""
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
