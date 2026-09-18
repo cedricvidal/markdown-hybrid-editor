@@ -28,10 +28,25 @@ export async function tempWorkspace(from = path.join(ROOT, "test/fixtures")) {
   return dir;
 }
 
-export async function launchCode({ workspace, scale = 2, width = 1440, height = 900 } = {}) {
+export async function launchCode({ workspace, scale = 2, width = 1440, height = 900, settings: extraSettings } = {}) {
   const ws = workspace ?? (await tempWorkspace());
   const userDataDir = await fs.mkdtemp(path.join(os.tmpdir(), "mhe-profile-"));
   const extensionsDir = await fs.mkdtemp(path.join(os.tmpdir(), "mhe-exts-"));
+
+  // Seed the profile so the demo starts from a known look rather than whatever
+  // the default happens to be this release.
+  const settingsPath = path.join(userDataDir, "User", "settings.json");
+  await fs.mkdir(path.dirname(settingsPath), { recursive: true });
+  const settings = {
+    "workbench.colorTheme": "Default Dark Modern",
+    "workbench.startupEditor": "none",
+    "window.commandCenter": false,
+    "workbench.activityBar.location": "default",
+    "chat.commandCenter.enabled": false,
+    "editor.fontSize": 14,
+    ...(extraSettings ?? {}),
+  };
+  await fs.writeFile(settingsPath, JSON.stringify(settings, null, 2));
 
   const app = await _electron.launch({
     executablePath: codeExecutable(),
@@ -67,6 +82,18 @@ export async function launchCode({ workspace, scale = 2, width = 1440, height = 
     app,
     page,
     workspace: ws,
+    userDataDir,
+    settingsPath,
+    /**
+     * VS Code watches settings.json, so writing it applies live — far more
+     * reliable than driving the settings UI or a quick pick, and it exercises
+     * exactly the onDidChangeConfiguration path the extension listens on.
+     */
+    async setSettings(patch) {
+      Object.assign(settings, patch);
+      await fs.writeFile(settingsPath, JSON.stringify(settings, null, 2));
+      await page.waitForTimeout(1200);
+    },
     async close() {
       await app.close().catch(() => {});
       for (const d of [userDataDir, extensionsDir, ws]) {
@@ -117,3 +144,4 @@ export async function runCommand(page, name) {
   await page.keyboard.press("Enter");
   await page.waitForTimeout(500);
 }
+
