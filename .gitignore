@@ -1,0 +1,11 @@
+node_modules/
+dist/
+out/
+.vscode-test/
+*.vsix
+
+# Recording harness: frames are transient, rebuilt on every run.
+demo/frames/
+demo/out/take-*/
+
+.DS_Store
