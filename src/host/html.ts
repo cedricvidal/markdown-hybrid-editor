@@ -19,6 +19,9 @@ export function makeNonce(): string {
  *   stylesheets through `EditorView.cspNonce` -> `StyleModule.mount(.., {nonce})`.
  * - `form-action` and `base-uri` do NOT inherit from `default-src`, so they are
  *   listed explicitly; omitting them leaves a crafted <form>/<base> usable.
+ * - `require-trusted-types-for 'script'` makes the browser *enforce* the
+ *   no-innerHTML rule rather than leaving it to review. Verified to survive both
+ *   VS Code's injected preload and CodeMirror, which contain no HTML sinks.
  */
 function csp(nonce: string, cspSource: string): string {
   return [
@@ -30,6 +33,7 @@ function csp(nonce: string, cspSource: string): string {
     "connect-src 'none'",
     "form-action 'none'",
     "base-uri 'none'",
+    "require-trusted-types-for 'script'",
   ].join("; ");
 }
 

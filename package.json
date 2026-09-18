@@ -81,14 +81,15 @@
     "build": "node esbuild.mjs --production",
     "watch": "node esbuild.mjs --watch",
     "typecheck": "tsc --noEmit -p tsconfig.host.json && tsc --noEmit -p tsconfig.webview.json",
-    "package": "pnpm typecheck && pnpm build && vsce package --no-dependencies"
+    "package": "pnpm typecheck && pnpm build && vsce package --no-dependencies",
+    "demo:smoke": "node demo/smoke.mjs"
   },
   "devDependencies": {
     "@types/node": "^24.10.1",
     "@types/vscode": "~1.90.0",
     "esbuild": "^0.25.0",
+    "playwright-core": "^1.63.0",
     "typescript": "^5.9.3"
   },
-  "dependencies": {},
   "packageManager": "pnpm@11.24.0"
 }
