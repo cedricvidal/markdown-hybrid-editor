@@ -4,6 +4,8 @@
  *
  * Run: pnpm demo:smoke
  */
+import fs from "node:fs/promises";
+import path from "node:path";
 import { launchCode, openFile, webviewFrame } from "./lib/launch.mjs";
 
 const violations = [];
@@ -113,6 +115,34 @@ try {
   await session.setSettings({ "markdownHybridEditor.readingMeasure": "68ch", "markdownHybridEditor.fontSize": null });
 
   await page.screenshot({ path: "demo/out/m1-reading.png" });
+
+  console.log("\n— M6: large documents bail out —");
+  // Generated rather than committed: a megabyte of fixture is not worth storing.
+  const big = ["# Big\n"];
+  while (big.join("").length < 1_600_000) big.push("Filler paragraph for the size guard.\n\n");
+  await fs.writeFile(path.join(session.workspace, "big.md"), big.join(""));
+  await page.waitForTimeout(1500);
+  await openFile(page, "big.md");
+  await page.waitForTimeout(3000);
+
+  const notice = await (async () => {
+    for (const f of page.frames()) {
+      try {
+        if (await f.$("#open")) return f;
+      } catch {
+        // frame detached mid-iteration
+      }
+    }
+    return null;
+  })();
+  check("a very large note shows the notice instead of the editor", !!notice);
+  if (notice) {
+    const heading = await notice.$eval("h1", (el) => el.textContent ?? "");
+    check("the notice explains why", /too large/i.test(heading), heading);
+    await notice.click("#open");
+    await page.waitForSelector(".editor-instance .monaco-editor .view-lines", { timeout: 30_000 });
+    check("its button opens the plain text editor", true);
+  }
 
   console.log("\n— security —");
   await page.waitForTimeout(800);
