@@ -74,7 +74,9 @@ try {
       for (const f of page.frames()) {
         try {
           if (await f.$("#root")) return f;
-        } catch {}
+        } catch {
+          // frame detached mid-iteration; try the next one
+        }
       }
       await page.waitForTimeout(250);
     }

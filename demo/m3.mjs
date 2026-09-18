@@ -1,5 +1,5 @@
 /** The M3 gate: live preview and the frontmatter strip. */
-import { launchCode, openFile, runCommand, MOD, webviewFrame } from "./lib/launch.mjs";
+import { launchCode, openFile, runCommand, webviewFrame } from "./lib/launch.mjs";
 import { editorText } from "./lib/editor.mjs";
 
 let failures = 0;
