@@ -102,6 +102,22 @@ try {
   const fenceText = await frame.$$eval(".cm-fm-line", (els) => els.map((e) => e.textContent ?? ""));
   check("the --- fences step aside", !fenceText.some((t) => t.trim() === "---"), JSON.stringify(fenceText.slice(0, 3)));
   check("keys and values are set apart", !!(await frame.$(".cm-fm-key")) && !!(await frame.$(".cm-fm-value")));
+
+  // Nesting reads as nesting: one guide per level, drawn where the leading
+  // spaces used to be.
+  const depths = await frame.$$eval(".cm-fm-line", (els) =>
+    els.map((e) => ({
+      text: (e.textContent ?? "").trim(),
+      depth: Number(e.style.getPropertyValue("--fm-depth") || 0),
+      pad: parseFloat(getComputedStyle(e).paddingLeft),
+    })),
+  );
+  const byText = (t) => depths.find((d) => d.text.startsWith(t));
+  check("top-level properties sit at depth 0", byText("title:")?.depth === 0, JSON.stringify(byText("title:")));
+  check("a nested key is one level in", byText("key:")?.depth === 1, JSON.stringify(byText("key:")));
+  check("a nested list item is two levels in", byText("- one")?.depth === 2, JSON.stringify(byText("- one")));
+  check("depth becomes real indentation", (byText("- one")?.pad ?? 0) > (byText("key:")?.pad ?? 0), `${byText("key:")?.pad}px vs ${byText("- one")?.pad}px`);
+  check("leading spaces are not also rendered", byText("key:")?.text === "key: value", JSON.stringify(byText("key:")?.text));
   check("no line shows raw source yet", (await frame.$$(".cm-fm-raw")).length === 0);
 
   await clickLine(frame, page, "tags:");

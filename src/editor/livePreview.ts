@@ -12,8 +12,26 @@ const HIDE = new Set(["HeaderMark", "EmphasisMark", "CodeMark", "StrikethroughMa
 
 const hidden = Decoration.replace({});
 
-/** Frontmatter, rendered: the properties read as properties. */
-const fmLine = Decoration.line({ class: "cm-fm-line" });
+/**
+ * Frontmatter, rendered: the properties read as properties.
+ *
+ * Nesting is shown with a guide per level rather than with leading spaces. The
+ * rendered block is set in a proportional face, where a run of spaces has no
+ * predictable width — so the indent is hidden and redrawn as padding, which is
+ * what lets the guides line up down the block.
+ */
+const fmLineByDepth = new Map<number, Decoration>();
+function fmLineAt(depth: number): Decoration {
+  let deco = fmLineByDepth.get(depth);
+  if (!deco) {
+    deco = Decoration.line({
+      class: "cm-fm-line",
+      attributes: { style: `--fm-depth: ${depth}` },
+    });
+    fmLineByDepth.set(depth, deco);
+  }
+  return deco;
+}
 /** Frontmatter, on the caret line: the YAML source, editable in place. */
 const fmLineRaw = Decoration.line({ class: "cm-fm-line cm-fm-raw" });
 /** The `---` fences, which carry no information once the block reads as one. */
@@ -141,8 +159,11 @@ function decorateFrontmatter(
     const line = state.doc.line(i);
     const onCaret = cursorLines.has(i);
     const isFence = FM_FENCE.test(line.text);
+    const indent = /^[ \t]*/.exec(line.text)?.[0] ?? "";
+    // YAML nests in twos; a tab counts as one level.
+    const depth = indent.includes("\t") ? indent.length : Math.floor(indent.length / 2);
 
-    out.push((onCaret ? fmLineRaw : isFence ? fmFence : fmLine).range(line.from));
+    out.push((onCaret ? fmLineRaw : isFence ? fmFence : fmLineAt(depth)).range(line.from));
     // The hairline sits under the closing fence, where the block ends.
     if (i === last) out.push(fmEnd.range(line.from));
 
@@ -153,6 +174,9 @@ function decorateFrontmatter(
       if (line.length > 0) out.push(hidden.range(line.from, line.to));
       continue;
     }
+
+    // The indent is redrawn as padding so the guides can line up.
+    if (indent.length > 0) out.push(hidden.range(line.from, line.from + indent.length));
 
     const pair = FM_PAIR.exec(line.text);
     if (pair) {

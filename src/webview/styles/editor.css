@@ -54,10 +54,24 @@
 /* Frontmatter follows the same rule as the body: rendered away from the caret,
    raw YAML on the line being edited. */
 .cm-fm-line {
+  --fm-depth: 0;
+  --fm-step: 15px;
   font-family: var(--font-ui);
   font-size: 13.5px;
   line-height: 1.85;
   color: var(--text);
+  /* One hairline per level of nesting, drawn where the hidden indent used to
+     be. The gradient repeats every step and is clipped to the depth, so a
+     nested property sits under a continuous guide. */
+  padding-left: calc(var(--fm-depth) * var(--fm-step)) !important;
+  background-image: repeating-linear-gradient(
+    to right,
+    var(--line) 0 1px,
+    transparent 1px var(--fm-step)
+  );
+  background-size: calc(var(--fm-depth) * var(--fm-step)) 100%;
+  background-repeat: no-repeat;
+  background-position: left top;
 }
 
 /* The line under the caret is the source, and looks like it. */
@@ -74,8 +88,11 @@
   line-height: 0.7;
 }
 
+/* The closing fence carries the hairline that separates the block from the
+   body. It needs headroom, or the indent guides above run straight into it. */
 .cm-fm-end {
   border-bottom: 1px solid var(--line);
+  padding-top: 10px !important;
   margin-bottom: 16px;
 }
 
