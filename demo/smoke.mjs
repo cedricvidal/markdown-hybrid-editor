@@ -36,7 +36,8 @@ try {
   check("CodeMirror mounted", true);
 
   const text = await frame.$eval(".cm-content", (el) => el.textContent ?? "");
-  check("document text present", text.includes("Heading one") && text.includes("Kitchen Sink"));
+  // The frontmatter folds by default from M3 on, so its YAML is not rendered.
+  check("document text present", text.includes("Heading one") && text.includes("Prose with"));
 
   // CodeMirror must own the scroller: if the body scrolls instead, viewport
   // virtualisation breaks and there is no scroll position to restore.
