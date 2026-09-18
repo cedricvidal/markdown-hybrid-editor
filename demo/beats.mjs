@@ -113,8 +113,9 @@ export const BEATS = [
     shot: "06-prose",
     run: async ({ page, editor, wv }) => {
       await wv.hlStop();
-      await runCommand(page, "Markdown Hybrid: Toggle Frontmatter");
-      await page.waitForTimeout(1000);
+      // Fold it from the control that sits with the block.
+      await (await editor()).click("[data-demo=frontmatter-fold]");
+      await page.waitForTimeout(1200);
       await clickLine(await editor(), page, "Heading six");
       await page.keyboard.press("ArrowDown");
       await page.waitForTimeout(600);

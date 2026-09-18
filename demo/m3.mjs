@@ -129,6 +129,19 @@ try {
   await clickLine(frame, page, "Heading one");
   check("leaving the line renders it again", (await frame.$$(".cm-fm-raw")).length === 0);
 
+  // The way to fold sits with the block it folds, not in the editor title bar.
+  const fold = await frame.$("[data-demo=frontmatter-fold]");
+  check("a fold control sits below the properties", !!fold);
+  const titleActions = await page.$$eval(".editor-actions .action-label", (els) =>
+    els.map((e) => e.getAttribute("aria-label") ?? ""),
+  );
+  check("nothing about frontmatter in the title bar", !titleActions.some((a) => /frontmatter/i.test(a)), JSON.stringify(titleActions[0]));
+  await fold?.click();
+  await page.waitForTimeout(1200);
+  check("the fold control folds it", !!(await frame.$("[data-demo=frontmatter-strip]")));
+  await frame.click("[data-demo=frontmatter-strip]");
+  await page.waitForTimeout(1200);
+
   await runCommand(page, "Markdown Hybrid: Toggle Frontmatter");
   await page.waitForTimeout(1200);
   check("the toggle command folds it again", !!(await frame.$("[data-demo=frontmatter-strip]")));

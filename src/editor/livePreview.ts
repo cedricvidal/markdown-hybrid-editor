@@ -7,6 +7,7 @@ import { syntaxTree } from "@codemirror/language";
 import { RangeSet, StateField, type EditorState, type Range } from "@codemirror/state";
 import { Decoration, EditorView, ViewPlugin, type DecorationSet, type ViewUpdate } from "@codemirror/view";
 import { rowLine, TableWidget } from "./tableWidget";
+import { FrontmatterFold } from "./frontmatterVisibility";
 
 const HIDE = new Set(["HeaderMark", "EmphasisMark", "CodeMark", "StrikethroughMark", "QuoteMark"]);
 
@@ -36,7 +37,10 @@ function fmLineAt(depth: number): Decoration {
 const fmLineRaw = Decoration.line({ class: "cm-fm-line cm-fm-raw" });
 /** The `---` fences, which carry no information once the block reads as one. */
 const fmFence = Decoration.line({ class: "cm-fm-line cm-fm-fence" });
+/** The closing fence, which carries the fold control and the hairline. */
+const fmFoot = Decoration.line({ class: "cm-fm-line cm-fm-foot" });
 const fmEnd = Decoration.line({ class: "cm-fm-end" });
+const fmFoldWidget = Decoration.replace({ widget: new FrontmatterFold() });
 
 const fmKey = Decoration.mark({ class: "cm-fm-key" });
 const fmValue = Decoration.mark({ class: "cm-fm-value" });
@@ -163,7 +167,8 @@ function decorateFrontmatter(
     // YAML nests in twos; a tab counts as one level.
     const depth = indent.includes("\t") ? indent.length : Math.floor(indent.length / 2);
 
-    out.push((onCaret ? fmLineRaw : isFence ? fmFence : fmLineAt(depth)).range(line.from));
+    const isFoot = isFence && i === last;
+    out.push((onCaret ? fmLineRaw : isFoot ? fmFoot : isFence ? fmFence : fmLineAt(depth)).range(line.from));
     // The hairline sits under the closing fence, where the block ends.
     if (i === last) out.push(fmEnd.range(line.from));
 
@@ -171,7 +176,8 @@ function decorateFrontmatter(
     if (onCaret) continue;
 
     if (isFence) {
-      if (line.length > 0) out.push(hidden.range(line.from, line.to));
+      // The closing fence becomes the fold control; the opening one steps aside.
+      if (line.length > 0) out.push((isFoot ? fmFoldWidget : hidden).range(line.from, line.to));
       continue;
     }
 

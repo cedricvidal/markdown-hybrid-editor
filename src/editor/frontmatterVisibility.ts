@@ -44,7 +44,7 @@ export function locateFrontmatter(doc: Text): FrontmatterRange | null {
   return found;
 }
 
-function chevron(): SVGElement {
+function chevron(direction: "right" | "up" = "right"): SVGElement {
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   svg.setAttribute("viewBox", "0 0 24 24");
   svg.setAttribute("width", "14");
@@ -56,9 +56,44 @@ function chevron(): SVGElement {
   svg.setAttribute("stroke-linejoin", "round");
   svg.setAttribute("aria-hidden", "true");
   const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-  path.setAttribute("d", "m9 18 6-6-6-6");
+  path.setAttribute("d", direction === "up" ? "m18 15-6-6-6 6" : "m9 18 6-6-6-6");
   svg.append(path);
   return svg;
+}
+
+/**
+ * The fold control, sitting on the closing `---` line — the affordance belongs
+ * with the block it folds, not in the editor title bar. The fence carries no
+ * information once the block reads as properties, so it becomes the button.
+ */
+export class FrontmatterFold extends WidgetType {
+  override eq() {
+    return true;
+  }
+
+  override ignoreEvent() {
+    return true;
+  }
+
+  override toDOM(view: EditorView) {
+    const button = document.createElement("span");
+    button.className = "cm-fm-fold";
+    button.setAttribute("role", "button");
+    button.tabIndex = 0;
+    button.title = view.state.facet(frontmatterHint).replace("Show", "Hide");
+    button.dataset["demo"] = "frontmatter-fold";
+    button.append(chevron("up"), Object.assign(document.createElement("span"), { textContent: "Fold" }));
+
+    const fold = (event: Event) => {
+      event.preventDefault();
+      view.state.facet(requestShowFrontmatter)(false);
+    };
+    button.addEventListener("mousedown", fold);
+    button.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") fold(event);
+    });
+    return button;
+  }
 }
 
 class FrontmatterStrip extends WidgetType {

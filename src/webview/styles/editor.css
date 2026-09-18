@@ -88,12 +88,52 @@
   line-height: 0.7;
 }
 
-/* The closing fence carries the hairline that separates the block from the
-   body. It needs headroom, or the indent guides above run straight into it. */
+/* The closing fence carries the fold control and the hairline that separates
+   the block from the body. It needs headroom, or the indent guides above run
+   straight into it. */
 .cm-fm-end {
   border-bottom: 1px solid var(--line);
-  padding-top: 10px !important;
+  padding-top: 8px !important;
+  padding-bottom: 6px !important;
   margin-bottom: 16px;
+}
+
+.cm-fm-foot {
+  font-size: 0;
+  line-height: 1;
+}
+
+/* Quiet until looked for: the block is already readable, so the way to fold it
+   only needs to be findable, not loud. */
+.cm-fm-fold {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font: 400 12px / 1.4 var(--font-ui);
+  color: var(--muted);
+  cursor: pointer;
+  user-select: none;
+  opacity: 0.55;
+  transition:
+    opacity var(--dur-fast) var(--ease),
+    color var(--dur-fast) var(--ease);
+}
+
+.cm-fm-fold svg {
+  width: 12px;
+  height: 12px;
+  transition: translate var(--dur-fast) var(--ease);
+}
+
+.cm-fm-fold:hover,
+.cm-fm-fold:focus-visible {
+  opacity: 1;
+  color: var(--text);
+  outline: none;
+}
+
+.cm-fm-fold:hover svg {
+  translate: 0 -1px;
 }
 
 .cm-fm-key {

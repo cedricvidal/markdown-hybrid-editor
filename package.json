@@ -96,32 +96,10 @@
         "title": "No-op (internal)",
         "category": "Markdown Hybrid",
         "enablement": "false"
-      },
-      {
-        "command": "markdownHybridEditor.showFrontmatter",
-        "title": "Show Frontmatter",
-        "category": "Markdown Hybrid",
-        "icon": "$(symbol-property)"
-      },
-      {
-        "command": "markdownHybridEditor.hideFrontmatter",
-        "title": "Hide Frontmatter",
-        "category": "Markdown Hybrid",
-        "icon": "$(symbol-property)"
       }
     ],
     "menus": {
       "editor/title": [
-        {
-          "command": "markdownHybridEditor.showFrontmatter",
-          "when": "activeCustomEditorId == markdownHybridEditor.editor && !markdownHybridEditor.frontmatterVisible",
-          "group": "navigation@0"
-        },
-        {
-          "command": "markdownHybridEditor.hideFrontmatter",
-          "when": "activeCustomEditorId == markdownHybridEditor.editor && markdownHybridEditor.frontmatterVisible",
-          "group": "navigation@0"
-        },
         {
           "command": "markdownHybridEditor.openWithTextEditor",
           "when": "activeCustomEditorId == markdownHybridEditor.editor",
@@ -157,14 +135,6 @@
         {
           "command": "markdownHybridEditor.goToLine",
           "when": "activeCustomEditorId == markdownHybridEditor.editor"
-        },
-        {
-          "command": "markdownHybridEditor.showFrontmatter",
-          "when": "false"
-        },
-        {
-          "command": "markdownHybridEditor.hideFrontmatter",
-          "when": "false"
         }
       ]
     },
