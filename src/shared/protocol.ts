@@ -32,14 +32,28 @@ export interface PersistedState {
   selection: WireSelection | null;
 }
 
+export type Typography = "reading" | "vscode";
+
 export interface WebviewConfig {
   /** CSP nonce for the stylesheets CodeMirror mounts at runtime. */
   nonce: string;
+  typography: Typography;
+  /**
+   * User overrides only. `null` means "not set", and the stylesheet supplies the
+   * default for the current typography mode — an inline custom property would
+   * otherwise outrank the mode's own rule and pin it for both modes.
+   */
+  fontFamily: string | null;
+  fontSize: number | null;
+  lineHeight: number | null;
+  /** A CSS length, or "none" for full width. */
+  readingMeasure: string | null;
 }
 
 /** host -> webview */
 export type HostMessage =
   | { type: "init"; text: string; config: WebviewConfig }
+  | { type: "config"; config: WebviewConfig }
   | { type: "focus" };
 
 /** webview -> host */

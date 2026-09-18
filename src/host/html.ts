@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import type { WebviewConfig } from "../shared/protocol";
 
 /**
  * 16 random bytes, base64. `globalThis.crypto` rather than `node:crypto` so the
@@ -37,13 +38,18 @@ function csp(nonce: string, cspSource: string): string {
   ].join("; ");
 }
 
-export function getHtml(webview: vscode.Webview, extensionUri: vscode.Uri, nonce: string): string {
+export function getHtml(
+  webview: vscode.Webview,
+  extensionUri: vscode.Uri,
+  nonce: string,
+  config: WebviewConfig,
+): string {
   const uri = (...parts: string[]) => webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, ...parts));
   const script = uri("dist", "webview.js");
   const style = uri("dist", "webview.css");
 
   return `<!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-typography="${config.typography}">
 <head>
 <meta charset="UTF-8">
 <meta http-equiv="Content-Security-Policy" content="${csp(nonce, webview.cspSource)}">

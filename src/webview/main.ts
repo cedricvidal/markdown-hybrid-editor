@@ -1,17 +1,19 @@
 import "./styles/tokens.css";
 import "./styles/editor.css";
+import type { EditorView } from "@codemirror/view";
 import type { HostMessage } from "../shared/protocol";
 import { readPersisted, vscodeApi } from "./persist";
+import { applyTypography, createView, reconfigure } from "./view";
 
 const root = document.getElementById("root");
+let view: EditorView | null = null;
 
-function render(text: string): void {
+function mount(text: string, config: Parameters<typeof applyTypography>[0]): void {
   if (!root) return;
-  const pre = document.createElement("pre");
-  pre.className = "mhe-raw";
-  // textContent, never innerHTML: document text is untrusted input.
-  pre.textContent = text;
-  root.replaceChildren(pre);
+  applyTypography(config);
+  view?.destroy();
+  root.replaceChildren();
+  view = createView(root, text, config);
 }
 
 window.addEventListener("message", (event: MessageEvent<HostMessage>) => {
@@ -19,9 +21,14 @@ window.addEventListener("message", (event: MessageEvent<HostMessage>) => {
   if (typeof message !== "object" || message === null) return;
   switch (message.type) {
     case "init":
-      render(message.text);
+      mount(message.text, message.config);
+      return;
+    case "config":
+      applyTypography(message.config);
+      if (view) reconfigure(view, message.config);
       return;
     case "focus":
+      view?.focus();
       return;
     default:
       return;

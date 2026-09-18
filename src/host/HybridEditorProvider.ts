@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import type { HostMessage, WebviewMessage } from "../shared/protocol";
 import { getHtml, makeNonce } from "./html";
+import { readConfig, SECTION } from "./config";
 
 export const VIEW_TYPE = "markdownHybridEditor.editor";
 
@@ -31,12 +32,17 @@ export class HybridEditorProvider implements vscode.CustomTextEditorProvider {
       // so no note can cause a local file read through the webview.
       localResourceRoots: [vscode.Uri.joinPath(this.context.extensionUri, "dist")],
     };
-    panel.webview.html = getHtml(panel.webview, this.context.extensionUri, nonce);
+    // Stamped into the document rather than applied after load, so the tab never
+    // flashes the wrong typography.
+    panel.webview.html = getHtml(panel.webview, this.context.extensionUri, nonce, readConfig(nonce));
 
     const post = (message: HostMessage) => void panel.webview.postMessage(message);
     const disposables: vscode.Disposable[] = [];
 
     disposables.push(
+      vscode.workspace.onDidChangeConfiguration((event) => {
+        if (event.affectsConfiguration(SECTION)) post({ type: "config", config: readConfig(nonce) });
+      }),
       panel.webview.onDidReceiveMessage((message: unknown) => {
         // Messages cross a trust boundary: the extension host has full filesystem
         // access, so nothing is destructured before its shape is checked.
@@ -47,7 +53,7 @@ export class HybridEditorProvider implements vscode.CustomTextEditorProvider {
             // postMessage before the webview script runs is dropped silently, so
             // the document is pushed only once the webview asks for it. The same
             // path serves first load, tab re-show and window reload.
-            post({ type: "init", text: document.getText(), config: { nonce } });
+            post({ type: "init", text: document.getText(), config: readConfig(nonce) });
             return;
           case "error":
             console.error(`[markdown-hybrid-editor] webview: ${String(msg.message).slice(0, 500)}`);
