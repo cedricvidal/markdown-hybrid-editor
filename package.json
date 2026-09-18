@@ -125,7 +125,8 @@
     "watch": "node esbuild.mjs --watch",
     "typecheck": "tsc --noEmit -p tsconfig.host.json && tsc --noEmit -p tsconfig.webview.json",
     "package": "pnpm typecheck && pnpm build && vsce package --no-dependencies",
-    "demo:smoke": "node demo/smoke.mjs"
+    "demo:smoke": "node demo/smoke.mjs",
+    "demo:m2": "node demo/m2.mjs"
   },
   "devDependencies": {
     "@types/node": "^24.10.1",
