@@ -8,6 +8,14 @@
     "name": "Cedric Vidal",
     "email": "cedric.vidal@gmail.com"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cedricvidal/markdown-hybrid-editor.git"
+  },
+  "bugs": {
+    "url": "https://github.com/cedricvidal/markdown-hybrid-editor/issues"
+  },
+  "homepage": "https://github.com/cedricvidal/markdown-hybrid-editor#readme",
   "publisher": "cedricvidal",
   "private": true,
   "engines": {
@@ -290,7 +298,7 @@
     "build": "node esbuild.mjs --production",
     "watch": "node esbuild.mjs --watch",
     "typecheck": "tsc --noEmit -p tsconfig.host.json && tsc --noEmit -p tsconfig.web.json && tsc --noEmit -p tsconfig.webview.json",
-    "package": "pnpm verify && vsce package --no-dependencies ${VSCE_BASE_IMAGES_URL:+--baseImagesUrl $VSCE_BASE_IMAGES_URL} ${VSCE_BASE_CONTENT_URL:+--baseContentUrl $VSCE_BASE_CONTENT_URL}",
+    "package": "pnpm verify && vsce package --no-dependencies",
     "demo:smoke": "node demo/smoke.mjs",
     "demo:m2": "node demo/m2.mjs",
     "demo:web": "node demo/web.mjs",
@@ -307,7 +315,7 @@
     "demo:record": "node demo/record.mjs",
     "demo:video": "bash demo/build-video.sh",
     "demo:gif": "bash demo/build-gif.sh",
-    "dev:install": "pnpm build && vsce package --no-dependencies --allow-missing-repository --baseImagesUrl ${MHE_REPO_RAW_URL:-https://example.com/markdown-hybrid-editor} --baseContentUrl ${MHE_REPO_URL:-https://example.com/markdown-hybrid-editor} -o .vsix-build.vsix && code --install-extension .vsix-build.vsix --force && rm -f .vsix-build.vsix",
+    "dev:install": "pnpm build && vsce package --no-dependencies -o .vsix-build.vsix && code --install-extension .vsix-build.vsix --force && rm -f .vsix-build.vsix",
     "dev:sync": "pnpm build && node -e \"const{cpSync,existsSync,readdirSync}=require('fs'),{join}=require('path'),d=join(require('os').homedir(),'.vscode/extensions'),m=readdirSync(d).find(n=>n.startsWith('cedricvidal.markdown-hybrid-editor-'));if(!m){console.error('not installed — run pnpm dev:install first');process.exit(1)}cpSync('dist',join(d,m,'dist'),{recursive:true});cpSync('package.json',join(d,m,'package.json'));console.log('synced to',m,'— now run Developer: Reload Window')\""
   },
   "devDependencies": {
