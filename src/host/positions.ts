@@ -1,5 +1,8 @@
 import * as vscode from "vscode";
 import type { WireChange, WirePos } from "../shared/protocol";
+import type { Eol } from "../shared/eol";
+
+export { normaliseIn, normaliseOut } from "../shared/eol";
 
 /**
  * The line/character boundary between VS Code and CodeMirror.
@@ -25,19 +28,17 @@ export function fromVsRange(range: vscode.Range): { start: WirePos; end: WirePos
   };
 }
 
-export function eolOf(document: vscode.TextDocument): "\n" | "\r\n" {
+export function eolOf(document: vscode.TextDocument): Eol {
   return document.eol === vscode.EndOfLine.CRLF ? "\r\n" : "\n";
 }
 
-/** Webview text -> document text. Without this a CRLF file gains mixed endings. */
-export function normaliseIn(text: string, eol: "\n" | "\r\n"): string {
-  return eol === "\r\n" ? text.replace(/\r?\n/g, "\r\n") : text.replace(/\r\n?/g, "\n");
-}
-
-/** Document text -> webview text, matching CodeMirror's own normalisation. */
-export function normaliseOut(text: string): string {
-  return text.replace(/\r\n?/g, "\n");
-}
+/**
+ * Bounds on a single batch. A batch is one debounce of typing or one paste, so
+ * these are far above anything real; they exist so a malformed or hostile
+ * message cannot make the extension host allocate without limit.
+ */
+const MAX_CHANGES = 10_000;
+const MAX_INSERTED = 8_000_000;
 
 /**
  * Guards the trust boundary: messages from the webview reach an extension host
@@ -46,14 +47,19 @@ export function normaliseOut(text: string): string {
  */
 export function validateChanges(raw: unknown, document: vscode.TextDocument): WireChange[] | null {
   if (!Array.isArray(raw)) return null;
+  if (raw.length > MAX_CHANGES) return null;
+
   const lastLine = document.lineCount - 1;
   const out: WireChange[] = [];
   let previousEnd: WirePos | null = null;
+  let inserted = 0;
 
   for (const item of raw) {
     if (typeof item !== "object" || item === null) return null;
     const { start, end, text } = item as Partial<WireChange>;
     if (typeof text !== "string") return null;
+    inserted += text.length;
+    if (inserted > MAX_INSERTED) return null;
     if (!isPos(start) || !isPos(end)) return null;
     if (start.line > lastLine || end.line > lastLine) return null;
     if (start.character > document.lineAt(start.line).text.length) return null;

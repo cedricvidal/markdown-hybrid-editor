@@ -87,16 +87,27 @@ export class DocumentSync {
     const eol = eolOf(this.document);
     for (const change of changes) edit.replace(this.document.uri, toRange(change), normaliseIn(change.text, eol));
 
-    this.pendingEchoes.push({ origin: session });
+    const echo = { origin: session };
+    this.pendingEchoes.push(echo);
+
     // Serialised: two concurrent applyEdits on one document race, because the
     // second was built against coordinates from before the first landed.
-    const ok = await this.enqueue(() => {
-      if (this.document.isClosed) return Promise.resolve(false);
-      return Promise.resolve(vscode.workspace.applyEdit(edit));
-    });
+    let ok = false;
+    try {
+      ok = await this.enqueue(() => {
+        if (this.document.isClosed) return Promise.resolve(false);
+        return Promise.resolve(vscode.workspace.applyEdit(edit));
+      });
+    } catch (error) {
+      console.error(`[markdown-hybrid-editor] applyEdit threw: ${String(error).slice(0, 300)}`);
+    }
 
     if (!ok) {
-      this.pendingEchoes.pop();
+      // Remove *this* echo, not the last one: another edit may have been queued
+      // behind it. Popping blindly would retire someone else's echo and leave
+      // the counter permanently out of step.
+      const at = this.pendingEchoes.indexOf(echo);
+      if (at !== -1) this.pendingEchoes.splice(at, 1);
       this.resyncAll("the edit could not be applied");
     }
   }
