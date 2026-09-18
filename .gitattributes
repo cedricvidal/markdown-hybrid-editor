@@ -1,0 +1,5 @@
+* text=auto
+
+# This fixture exists to prove CRLF documents survive a round trip. Git must not
+# normalise it, or the test silently becomes a duplicate of the LF case.
+test/fixtures/crlf.md -text
