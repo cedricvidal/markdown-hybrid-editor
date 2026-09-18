@@ -22,6 +22,10 @@ Built on CodeMirror 6. Runs in VS Code desktop and in the browser
   straight back on the line you are editing.
 - **Links collapse to their text.** `[label](https://…)` reads as *label*; a bare
   `[label]` with no URL, like `app[bot]`, is left alone.
+- **GitHub alerts** — `> [!NOTE]`, `[!TIP]`, `[!IMPORTANT]`, `[!WARNING]`,
+  `[!CAUTION]` — are marked rather than boxed: a coloured rail down the passage
+  and the name on a rule, in your theme's own colours. The prose keeps the
+  reading face, and the marker shows its source under the caret.
 - **Tables render as tables, and edit in place.** Click a cell and it shows its raw
   markdown; type and the row is rewritten. Tab and Shift-Tab walk the cells.
 - **Frontmatter folds** behind a one-row `3 properties` summary. Unfolded, it

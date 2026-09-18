@@ -274,3 +274,124 @@ body.vscode-high-contrast-light .cm-code {
   background: var(--line);
   border-radius: 3px;
 }
+
+/* ---- GitHub alerts --------------------------------------------------------
+   An alert is an aside in a document, not a notification. So it is set the way
+   a book sets one: the prose keeps the reading face and is never boxed, and the
+   passage is marked instead — a coloured rail down its edge, and a name sitting
+   on a rule above it.
+
+   Colours come from the theme's own chart palette, so they sit right in
+   whatever theme is active, with an editor-semantic fallback where one exists. */
+
+.cm-alert {
+  /* A rail, not a border: rounded caps read as a deliberate mark. */
+  border-left: 3px solid transparent !important;
+  border-image: none;
+  background-image: linear-gradient(var(--alert), var(--alert));
+  background-repeat: no-repeat;
+  background-size: 3px 100%;
+  background-position: left center;
+  color: var(--text);
+  padding-left: 18px !important;
+}
+
+.cm-alert-open {
+  background-size: 3px calc(100% - 5px);
+  background-position: left bottom;
+  padding-top: 10px !important;
+}
+
+.cm-alert-close {
+  background-size: 3px calc(100% - 6px);
+  background-position: left top;
+  padding-bottom: 12px !important;
+}
+
+/* A single-line alert is both ends at once. */
+.cm-alert-open.cm-alert-close {
+  background-size: 3px calc(100% - 11px);
+  background-position: left center;
+}
+
+.cm-alert-note {
+  --alert: var(--vscode-charts-blue, var(--vscode-editorInfo-foreground, #539bf5));
+}
+
+.cm-alert-tip {
+  --alert: var(--vscode-charts-green, var(--vscode-testing-iconPassed, #57ab5a));
+}
+
+.cm-alert-important {
+  --alert: var(--vscode-charts-purple, #986ee2);
+}
+
+.cm-alert-warning {
+  --alert: var(--vscode-editorWarning-foreground, var(--vscode-charts-yellow, #c69026));
+}
+
+.cm-alert-caution {
+  --alert: var(--vscode-editorError-foreground, var(--vscode-charts-red, #e5534b));
+}
+
+/* The name sits on a rule that runs out to the measure, the way a section mark
+   does in print. Sentence case: this is a word, not a label. */
+.cm-alert-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  font-family: var(--font-ui);
+  font-size: 0.74em;
+  font-weight: 600;
+  letter-spacing: 0.015em;
+  color: var(--alert);
+  vertical-align: middle;
+}
+
+/* The rule breathes out rather than stopping dead: a hard bar to the measure
+   would weigh more than the passage it introduces. */
+.cm-alert-title::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--alert) 34%, transparent),
+    transparent 92%
+  );
+}
+
+.cm-alert-title svg {
+  flex: none;
+  /* The one place the colour is allowed to be solid. */
+  opacity: 0.9;
+}
+
+/* Quoted text inside an alert is the alert's own prose, not a quotation. */
+.cm-alert .cm-quote {
+  font-style: normal;
+  color: var(--text);
+}
+
+/* High contrast themes fill nothing and rely on edges. */
+body.vscode-high-contrast .cm-alert-title::after,
+body.vscode-high-contrast-light .cm-alert-title::after {
+  background: var(--alert);
+}
+
+/* Light themes need a touch more rail to hold their own against the page. */
+body.vscode-light .cm-alert,
+body.vscode-high-contrast-light .cm-alert {
+  background-size: 4px 100%;
+}
+
+body.vscode-light .cm-alert-open,
+body.vscode-high-contrast-light .cm-alert-open {
+  background-size: 4px calc(100% - 5px);
+}
+
+body.vscode-light .cm-alert-close,
+body.vscode-high-contrast-light .cm-alert-close {
+  background-size: 4px calc(100% - 6px);
+}

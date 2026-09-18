@@ -155,6 +155,70 @@ try {
 
   await page.screenshot({ path: "demo/out/m3-live-preview.png" });
 
+  console.log("\n— GitHub alerts —");
+  await runCommand(page, "View: Close All Editors");
+  await page.waitForTimeout(1200);
+  await openFile(page, "alerts.md");
+  const alerts = await webviewFrame(page, ".cm-content");
+  await alerts.waitForSelector(".cm-content");
+  await page.waitForTimeout(900);
+
+  const rendered = await alerts.evaluate(() => ({
+    titles: [...document.querySelectorAll(".cm-alert-title")].map((t) => t.textContent),
+    icons: document.querySelectorAll(".cm-alert-title svg path").length,
+    kinds: ["note", "tip", "important", "warning", "caution"].filter(
+      (k) => document.querySelectorAll(`.cm-alert-${k}`).length > 0,
+    ),
+  }));
+  check("all five kinds render", rendered.kinds.length === 5, rendered.kinds.join(", "));
+  check("each carries an icon", rendered.icons >= 5 && rendered.icons === rendered.titles.length, `${rendered.icons} icons`);
+  check("names are GitHub's, in sentence case", rendered.titles.includes("Note") && rendered.titles.includes("Caution"), JSON.stringify(rendered.titles.slice(0, 5)));
+
+  const colours = await alerts.evaluate(() =>
+    ["note", "tip", "important", "warning", "caution"].map((k) => {
+      const el = document.querySelector(`.cm-alert-${k} .cm-alert-title`);
+      return el ? getComputedStyle(el).color : "none";
+    }),
+  );
+  check("each kind has its own colour", new Set(colours).size === 5, colours.join(" "));
+
+  // Prose stays prose: the passage is marked, not boxed.
+  const alertProse = await alerts.evaluate(() => {
+    const line = [...document.querySelectorAll(".cm-alert")].find((l) => (l.textContent ?? "").includes("Useful information"));
+    return line ? getComputedStyle(line).fontFamily : "";
+  });
+  check("alert prose keeps the reading face", /serif/i.test(alertProse), alertProse.slice(0, 28));
+
+  // Not every blockquote is an alert. These sit at the end of the fixture, and
+  // CodeMirror only renders the viewport — so scroll them into it first.
+  await alerts.evaluate(() => {
+    const scroller = document.querySelector(".cm-scroller");
+    if (scroller) scroller.scrollTop = scroller.scrollHeight;
+  });
+  await page.waitForTimeout(700);
+  const plain = await alerts.$$eval(".cm-quote-line:not(.cm-alert)", (els) => els.map((e) => e.textContent ?? ""));
+  check("a plain blockquote stays plain", plain.some((t) => t.includes("A plain blockquote")));
+  check("an unknown kind is not an alert", plain.some((t) => t.includes("[!UNKNOWN]")));
+  check("a marker mid-line is not an alert", plain.some((t) => t.includes("Text before the marker")));
+
+  // The marker follows the same rule as every other piece of markup.
+  await alerts.evaluate(() => {
+    const scroller = document.querySelector(".cm-scroller");
+    if (scroller) scroller.scrollTop = 0;
+  });
+  await page.waitForTimeout(700);
+  // Scoped to the marker line: the fixture also contains a literal [!NOTE]
+  // written in prose, which must stay exactly as written.
+  const markerLine = () =>
+    alerts.evaluate(() => document.querySelector(".cm-alert-open")?.textContent ?? "");
+  check("the marker reads as a name away from the caret", (await markerLine()).startsWith("Note"), JSON.stringify(await markerLine()));
+
+  await clickLine(alerts, page, "Useful information");
+  await page.keyboard.press("ArrowUp");
+  await page.waitForTimeout(500);
+  check("the caret on the marker line shows its source", (await markerLine()).includes("[!NOTE]"), JSON.stringify(await markerLine()));
+  check("the passage keeps its colour while editing", !!(await alerts.$(".cm-alert-note")));
+
   console.log("\n— security —");
   check("no CSP / Trusted Types violations", violations.length === 0, violations.slice(0, 2).join(" | "));
 } catch (err) {

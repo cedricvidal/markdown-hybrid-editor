@@ -133,11 +133,38 @@ export const BEATS = [
     },
   },
   {
+    caption: "GitHub alerts are marked, not boxed — the prose stays prose.",
+    ms: 4400,
+    shot: "07b-alerts",
+    run: async ({ page, editor, wv }) => {
+      await wv.hlStop();
+      await openFile(page, "alerts.md");
+      const frame = await editor();
+      await frame.waitForSelector(".cm-alert-title");
+      await page.waitForTimeout(900);
+      await wv.hlStart({ selector: ".cm-alert-caution" }, "Five kinds, your theme's colours");
+    },
+  },
+  {
+    caption: "And the marker gives back its source under the caret, like everything else.",
+    ms: 4000,
+    shot: "07c-alert-source",
+    run: async ({ page, editor, wv }) => {
+      await wv.hlStop();
+      await clickLine(await editor(), page, "Useful information");
+      await page.keyboard.press("ArrowUp");
+      await page.waitForTimeout(700);
+      await wv.hlStart({ selector: ".cm-alert-open" }, "[!NOTE]");
+    },
+  },
+  {
     caption: "Tables render as tables.",
     ms: 3400,
     shot: "08-table",
     run: async ({ page, editor, wv }) => {
       await wv.hlStop();
+      await openFile(page, "kitchen-sink.md");
+      await page.waitForTimeout(1200);
       await (await editor()).evaluate(() =>
         document.querySelector(".cm-table-widget")?.scrollIntoView({ block: "center" }),
       );

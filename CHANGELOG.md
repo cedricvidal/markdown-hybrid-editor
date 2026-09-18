@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Hybrid markdown editing: marks hide on every line the caret is not on.
+- GitHub alerts (`[!NOTE]`, `[!TIP]`, `[!IMPORTANT]`, `[!WARNING]`, `[!CAUTION]`)
+  rendered as marked passages in the theme's own colours.
 - GFM tables rendered as tables, editable cell by cell.
 - YAML frontmatter folded behind a one-row summary, with a toggle.
 - Reading typography with a capped measure, or the editor's own font.

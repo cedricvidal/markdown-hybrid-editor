@@ -8,6 +8,7 @@ import { RangeSet, StateField, type EditorState, type Range } from "@codemirror/
 import { Decoration, EditorView, ViewPlugin, type DecorationSet, type ViewUpdate } from "@codemirror/view";
 import { rowLine, TableWidget } from "./tableWidget";
 import { FrontmatterFold } from "./frontmatterVisibility";
+import { AlertTitle, alertKind, markerSpan, type AlertKind } from "./alerts";
 
 const HIDE = new Set(["HeaderMark", "EmphasisMark", "CodeMark", "StrikethroughMark", "QuoteMark"]);
 
@@ -46,6 +47,28 @@ const fmKey = Decoration.mark({ class: "cm-fm-key" });
 const fmValue = Decoration.mark({ class: "cm-fm-value" });
 const fmBullet = Decoration.mark({ class: "cm-fm-bullet" });
 const quoteLine = Decoration.line({ class: "cm-quote-line" });
+
+/** A GitHub alert is a blockquote wearing a kind. */
+const alertLines = new Map<string, Decoration>();
+function alertLine(kind: AlertKind, position: "open" | "body" | "close"): Decoration {
+  const key = `${kind}:${position}`;
+  let deco = alertLines.get(key);
+  if (!deco) {
+    deco = Decoration.line({ class: `cm-quote-line cm-alert cm-alert-${kind} cm-alert-${position}` });
+    alertLines.set(key, deco);
+  }
+  return deco;
+}
+
+const alertTitles = new Map<AlertKind, Decoration>();
+function alertTitle(kind: AlertKind): Decoration {
+  let deco = alertTitles.get(kind);
+  if (!deco) {
+    deco = Decoration.replace({ widget: new AlertTitle(kind) });
+    alertTitles.set(kind, deco);
+  }
+  return deco;
+}
 const codeBlockLine = Decoration.line({ class: "cm-codeblock-line" });
 const mdLink = Decoration.mark({ class: "cm-mdlink" });
 
@@ -109,9 +132,33 @@ export function buildDecorations(state: EditorState, ranges: readonly { from: nu
           case "Frontmatter":
             decorateFrontmatter(state, node.from, node.to, cursorLines, decorations, seenLines);
             return false;
-          case "Blockquote":
-            lineDeco(node.from, node.to, quoteLine);
+          case "Blockquote": {
+            const first = state.doc.lineAt(node.from);
+            const kind = alertKind(first.text);
+            if (!kind) {
+              lineDeco(node.from, node.to, quoteLine);
+              return;
+            }
+
+            // A blockquote that declares a kind reads as a callout: the whole
+            // block takes the kind's colour and the marker becomes its title.
+            const lastLine = state.doc.lineAt(Math.max(node.from, node.to - 1)).number;
+            for (let i = first.number; i <= lastLine; i++) {
+              if (seenLines.has(i)) continue;
+              seenLines.add(i);
+              const line = state.doc.line(i);
+              // Each end is named, so the rail and the spacing belong to this
+              // alert rather than to whatever line happens to come last.
+              const position = i === first.number ? "open" : i === lastLine ? "close" : "body";
+              decorations.push(alertLine(kind, position).range(line.from));
+            }
+
+            // On the marker line the source stands as written, like any other.
+            if (cursorLines.has(first.number)) return;
+            const span = markerSpan(first.text);
+            if (span) decorations.push(alertTitle(kind).range(first.from + span.from, first.from + span.to));
             return;
+          }
           case "FencedCode":
             lineDeco(node.from, node.to, codeBlockLine);
             return;
