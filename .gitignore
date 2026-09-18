@@ -8,5 +8,9 @@ out/
 # Recording harness: frames are transient, rebuilt on every run.
 demo/frames/
 demo/out/take-*/
+# Gate screenshots are regenerated on every run; only curated demo assets
+# (the walkthrough video and its stills) are committed.
+demo/out/m*.png
+demo/out/web.png
 
 .DS_Store

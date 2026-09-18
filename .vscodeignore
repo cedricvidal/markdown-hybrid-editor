@@ -8,5 +8,6 @@
 !README.md
 !CHANGELOG.md
 !LICENSE
-!demo/out/*.png
-!demo/out/*.gif
+
+# Screenshots stay out of the .vsix: the Marketplace needs absolute URLs for
+# README images anyway, so shipping them would be a megabyte for nothing.

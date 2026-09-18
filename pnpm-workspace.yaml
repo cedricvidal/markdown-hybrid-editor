@@ -1,6 +1,7 @@
-# esbuild's postinstall only resolves its platform binary; allowed so `pnpm install`
-# is clean on every platform, not just the one where the optional dep happens to work.
-# @playwright/browser-chromium downloads the browser @vscode/test-web runs against.
+# esbuild's postinstall resolves its platform binary; @playwright/browser-chromium
+# downloads the browser @vscode/test-web runs against; vsce-sign ships a native
+# signing helper. All are devDependencies of this repo's own tooling.
 allowBuilds:
   esbuild: true
   "@playwright/browser-chromium": true
+  "@vscode/vsce-sign": true
