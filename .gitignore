@@ -1,6 +1,7 @@
 node_modules/
 dist/
-out/
+# Root only: demo/out holds the committed walkthrough assets.
+/out/
 .vscode-test/
 .vscode-test-web/
 *.vsix
@@ -8,9 +9,9 @@ out/
 # Recording harness: frames are transient, rebuilt on every run.
 demo/frames/
 demo/out/take-*/
-# Gate screenshots are regenerated on every run; only curated demo assets
-# (the walkthrough video and its stills) are committed.
-demo/out/m*.png
+# Gate screenshots are regenerated on every run; the walkthrough assets
+# (video, GIF and the numbered stills) are committed for the README.
+demo/out/m[0-9]-*.png
 demo/out/web.png
 
 .DS_Store

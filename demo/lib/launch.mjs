@@ -28,7 +28,7 @@ export async function tempWorkspace(from = path.join(ROOT, "test/fixtures")) {
   return dir;
 }
 
-export async function launchCode({ workspace, scale = 2, width = 1440, height = 900, settings: extraSettings } = {}) {
+export async function launchCode({ workspace, scale = 2, width = 1440, height = 900, settings: extraSettings, background = false } = {}) {
   const ws = workspace ?? (await tempWorkspace());
   const userDataDir = await fs.mkdtemp(path.join(os.tmpdir(), "mhe-profile-"));
   const extensionsDir = await fs.mkdtemp(path.join(os.tmpdir(), "mhe-exts-"));
@@ -44,6 +44,17 @@ export async function launchCode({ workspace, scale = 2, width = 1440, height = 
     "workbench.activityBar.location": "default",
     "chat.commandCenter.enabled": false,
     "editor.fontSize": 14,
+    // Keep the frame about the editor: no chat panel, no minimap, no toasts
+    // from a sandbox that cannot resolve a shell.
+    "workbench.secondarySideBar.defaultVisibility": "hidden",
+    "chat.experimental.offerSetup": false,
+    "workbench.editor.empty.hint": "hidden",
+    "editor.minimap.enabled": false,
+    "telemetry.telemetryLevel": "off",
+    "update.mode": "none",
+    "extensions.ignoreRecommendations": true,
+    "workbench.tips.enabled": false,
+    "terminal.integrated.shellIntegration.enabled": false,
     ...(extraSettings ?? {}),
   };
   await fs.writeFile(settingsPath, JSON.stringify(settings, null, 2));
@@ -67,6 +78,21 @@ export async function launchCode({ workspace, scale = 2, width = 1440, height = 
   });
 
   const page = await app.firstWindow();
+
+  /**
+   * Park the window off-screen so a long recording does not sit in front of
+   * whatever else is going on. The CDP screencast captures the renderer, not
+   * the screen, so it keeps producing frames — and Playwright's input is
+   * dispatched over CDP, so an unfocused window still receives every keystroke.
+   */
+  if (background) {
+    await app.evaluate(({ BrowserWindow }) => {
+      const win = BrowserWindow.getAllWindows()[0];
+      if (!win) return;
+      win.setPosition(-5000, 0);
+      win.showInactive();
+    });
+  }
   await page.waitForSelector(".monaco-workbench", { timeout: 60_000 });
   // The workbench paints before its keybindings are live; driving it any earlier
   // sends keystrokes into a window that silently drops them.
@@ -76,7 +102,7 @@ export async function launchCode({ workspace, scale = 2, width = 1440, height = 
   await app.evaluate(({ BrowserWindow }, bounds) => {
     const win = BrowserWindow.getAllWindows()[0];
     if (win) win.setBounds(bounds);
-  }, { x: 0, y: 0, width, height });
+  }, { x: background ? -5000 : 0, y: 0, width, height });
 
   return {
     app,
@@ -84,6 +110,11 @@ export async function launchCode({ workspace, scale = 2, width = 1440, height = 
     workspace: ws,
     userDataDir,
     settingsPath,
+    /** Re-find the webview frame after a tab has been closed and reopened. */
+    async refreshFrame() {
+      return webviewFrame(page, ".cm-content");
+    },
+
     /**
      * VS Code watches settings.json, so writing it applies live — far more
      * reliable than driving the settings UI or a quick pick, and it exercises
@@ -145,3 +176,23 @@ export async function runCommand(page, name) {
   await page.waitForTimeout(500);
 }
 
+
+/**
+ * Make the window presentable for a recording: close the chat panel and clear
+ * any startup toast. Neither is worth a frame of a walkthrough.
+ */
+export async function tidyForDemo(page) {
+  await runCommand(page, "Notifications: Clear All Notifications");
+  await page.waitForTimeout(400);
+
+  // VS Code keeps the part in the DOM and collapses it, so measure rather than
+  // look for a class.
+  const auxWidth = () =>
+    page.evaluate(() => document.querySelector(".part.auxiliarybar")?.getBoundingClientRect().width ?? 0);
+  if ((await auxWidth()) > 0) {
+    await runCommand(page, "View: Toggle Secondary Side Bar Visibility");
+    await page.waitForTimeout(800);
+  }
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(400);
+}

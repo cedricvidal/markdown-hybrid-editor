@@ -317,7 +317,8 @@
     "verify": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
     "demo:security": "node demo/security.mjs",
     "demo:record": "node demo/record.mjs",
-    "demo:video": "bash demo/build-video.sh"
+    "demo:video": "bash demo/build-video.sh",
+    "demo:gif": "bash demo/build-gif.sh"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

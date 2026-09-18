@@ -7,6 +7,11 @@ pane, no mode switch, no second copy of the document.
 Built on CodeMirror 6. Runs in VS Code desktop and in the browser
 (vscode.dev, github.dev).
 
+![Markdown Hybrid Editor](demo/out/walkthrough.gif)
+
+*A note reads as prose; the line under the caret shows its markdown.*
+[Full walkthrough (3 min)](demo/out/walkthrough.mp4)
+
 > **Status:** early. The editor works and is covered by automated gates, but it
 > has not been through a release yet.
 
@@ -19,8 +24,9 @@ Built on CodeMirror 6. Runs in VS Code desktop and in the browser
   `[label]` with no URL, like `app[bot]`, is left alone.
 - **Tables render as tables, and edit in place.** Click a cell and it shows its raw
   markdown; type and the row is rewritten. Tab and Shift-Tab walk the cells.
-- **Frontmatter folds** behind a one-row `3 properties` summary. Click it, or press
-  <kbd>⌘⌥P</kbd> / <kbd>Ctrl+Alt+P</kbd>, to see the YAML.
+- **Frontmatter folds** behind a one-row `3 properties` summary. Unfolded, it
+  follows the same rule as the body: properties read as properties, with a guide
+  per level of nesting, and the line under the caret shows its YAML.
 - **A reading column** — serif body text, a capped line length, a real heading
   scale — or your normal editor font, if you prefer. Colours always follow your
   VS Code theme.
@@ -96,7 +102,20 @@ pnpm dev:web     # run it in a browser
 
 `pnpm demo:gates` drives a real VS Code through Playwright and checks each
 milestone end to end — typing reaches disk, undo is per burst not per keystroke,
-two views of one document stay in step, CRLF survives a round trip.
+two views of one document stay in step, CRLF survives a round trip, and a note
+full of hostile markup executes nothing.
+
+```bash
+pnpm demo:record   # drive VS Code through the walkthrough, off-screen
+pnpm demo:video    # frames -> walkthrough.mp4
+pnpm demo:gif      # the first 34s as a GIF, for the README
+```
+
+The walkthrough doubles as acceptance evidence: every beat is a milestone gate,
+so a green recording shows the features working rather than just rendering. It
+records with the window parked off-screen — the screencast captures the
+renderer, not the screen — so a three-minute run does not sit in front of
+whatever else is happening. `MHE_FOREGROUND=1` shows it live while editing beats.
 
 ### Layout
 
