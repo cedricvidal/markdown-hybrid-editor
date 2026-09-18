@@ -6,6 +6,7 @@ import type { HostMessage, WebviewConfig, WireChange } from "../shared/protocol"
 import { readPersisted, vscodeApi, writePersisted } from "./persist";
 import { EditBridge, fromHost, offsetAt } from "./bridge";
 import { applyTypography, createView, reconfigure } from "./view";
+import { normalizeFrontmatterEnd } from "../editor/frontmatterVisibility";
 
 const root = document.getElementById("root");
 let view: EditorView | null = null;
@@ -30,6 +31,7 @@ function mount(text: string, config: WebviewConfig, readOnly: boolean, active: b
     const scroller = view.scrollDOM;
     scroller.scrollTop = persisted.scrollTop;
   }
+  normalizeFrontmatterEnd(view);
   if (active) view.focus();
 }
 
@@ -77,7 +79,10 @@ window.addEventListener("message", (event: MessageEvent<HostMessage>) => {
       return;
     case "config":
       applyTypography(message.config);
-      if (view) reconfigure(view, message.config);
+      if (view) {
+        reconfigure(view, message.config);
+        normalizeFrontmatterEnd(view);
+      }
       return;
     case "apply":
       // Local edits in flight means the incoming change was computed against a

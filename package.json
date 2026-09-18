@@ -50,6 +50,16 @@
         "title": "Reopen in Hybrid Editor",
         "category": "Markdown Hybrid",
         "icon": "$(book)"
+      },
+      {
+        "command": "markdownHybridEditor.toggleFrontmatter",
+        "title": "Toggle Frontmatter",
+        "category": "Markdown Hybrid"
+      },
+      {
+        "command": "markdownHybridEditor.toggleLivePreview",
+        "title": "Toggle Live Preview",
+        "category": "Markdown Hybrid"
       }
     ],
     "menus": {
@@ -73,6 +83,14 @@
         {
           "command": "markdownHybridEditor.openWithHybrid",
           "when": "resourceLangId == markdown && !activeCustomEditorId"
+        },
+        {
+          "command": "markdownHybridEditor.toggleFrontmatter",
+          "when": "activeCustomEditorId == markdownHybridEditor.editor"
+        },
+        {
+          "command": "markdownHybridEditor.toggleLivePreview",
+          "when": "activeCustomEditorId == markdownHybridEditor.editor"
         }
       ]
     },
@@ -116,9 +134,33 @@
           "type": "string",
           "default": "68ch",
           "markdownDescription": "Maximum line length in reading typography, as a CSS length. Use `none` for full width."
+        },
+        "markdownHybridEditor.frontmatter.collapsedByDefault": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Fold the YAML frontmatter block behind a one-row summary. This is a single global preference: the toggle command and the strip both write it, so it applies to every open hybrid editor at once."
+        },
+        "markdownHybridEditor.livePreview.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Hide markdown marks on every line the caret is not on. Turn off to always see raw markdown."
         }
       }
-    }
+    },
+    "keybindings": [
+      {
+        "command": "markdownHybridEditor.toggleFrontmatter",
+        "key": "ctrl+alt+p",
+        "mac": "cmd+alt+p",
+        "when": "activeCustomEditorId == markdownHybridEditor.editor"
+      },
+      {
+        "command": "markdownHybridEditor.toggleLivePreview",
+        "key": "ctrl+alt+l",
+        "mac": "cmd+alt+l",
+        "when": "activeCustomEditorId == markdownHybridEditor.editor"
+      }
+    ]
   },
   "scripts": {
     "build": "node esbuild.mjs --production",
@@ -128,7 +170,8 @@
     "demo:smoke": "node demo/smoke.mjs",
     "demo:m2": "node demo/m2.mjs",
     "demo:web": "node demo/web.mjs",
-    "dev:web": "vscode-test-web --extensionDevelopmentPath=. --folder-uri=memfs:/sample"
+    "dev:web": "vscode-test-web --extensionDevelopmentPath=. --folder-uri=memfs:/sample",
+    "demo:m3": "node demo/m3.mjs"
   },
   "devDependencies": {
     "@types/node": "^24.10.1",

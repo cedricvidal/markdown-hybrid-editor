@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import type { WebviewMessage } from "../shared/protocol";
 import { getHtml, makeNonce } from "./html";
-import { readConfig, SECTION } from "./config";
+import { readConfig, SECTION, setShowFrontmatter } from "./config";
 import { DocumentSync } from "./DocumentSync";
 import { EditorSession } from "./EditorSession";
 import { validateChanges } from "./positions";
@@ -84,6 +84,10 @@ export class HybridEditorProvider implements vscode.CustomTextEditorProvider {
 
           case "resyncRequest":
             sync.resync(session);
+            return;
+
+          case "setShowFrontmatter":
+            if (typeof message.show === "boolean") void setShowFrontmatter(message.show);
             return;
 
           case "selection":

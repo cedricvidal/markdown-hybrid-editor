@@ -2,7 +2,10 @@ import { Compartment, EditorState, type Extension } from "@codemirror/state";
 import { EditorView, drawSelection } from "@codemirror/view";
 import type { WebviewConfig } from "../shared/protocol";
 import { readingExtensions } from "../editor/presets";
+import { initialSelection, setShowFrontmatter } from "../editor/frontmatterVisibility";
+import { requestShowFrontmatter } from "../editor/hostBridge";
 import type { EditBridge } from "./bridge";
+import { vscodeApi } from "./persist";
 
 /**
  * Everything config-dependent sits in a compartment, so a settings change
@@ -11,12 +14,30 @@ import type { EditBridge } from "./bridge";
  */
 const configurable = new Compartment();
 
+/**
+ * The toggle's keybinding, written the way this platform writes it. Detected in
+ * the webview rather than the host: the host may be a Web Worker with no
+ * platform to ask, and the webview is on the user's actual machine either way.
+ */
+function frontmatterHintText(): string {
+  const mac = /Mac|iPhone|iPad/i.test(navigator.platform || navigator.userAgent);
+  return `Show the frontmatter block (${mac ? "\u2318\u2325P" : "Ctrl+Alt+P"})`;
+}
+
 function configExtensions(config: WebviewConfig): Extension {
   return [
-    // CodeMirror mounts its stylesheets at runtime; without the nonce they are
-    // blocked by our own style-src. This is why the CSP needs no 'unsafe-inline'.
+    // Nonce the stylesheets CodeMirror mounts at runtime. style-src currently
+    // has to allow inline anyway (CodeMirror sets style attributes, which no
+    // nonce can cover), so this is belt-and-braces rather than load-bearing.
     EditorView.cspNonce.of(config.nonce),
-    ...readingExtensions(),
+    // The strip asks the host rather than flipping local state, so the setting
+    // stays the single source of truth and every open editor follows.
+    requestShowFrontmatter.of((show) => vscodeApi.postMessage({ type: "setShowFrontmatter", show })),
+    ...readingExtensions({
+      livePreview: config.livePreview,
+      showFrontmatter: config.showFrontmatter,
+      frontmatterHint: frontmatterHintText(),
+    }),
   ];
 }
 
@@ -31,6 +52,9 @@ export function createView(
     parent,
     state: EditorState.create({
       doc: text,
+      // Start the caret on the body when the block is folded: transaction
+      // filters do not run on state creation.
+      selection: { anchor: initialSelection(text, config.showFrontmatter) },
       extensions: [
         EditorState.readOnly.of(readOnly),
         drawSelection(),
@@ -46,7 +70,14 @@ export function createView(
 }
 
 export function reconfigure(view: EditorView, config: WebviewConfig): void {
-  view.dispatch({ effects: configurable.reconfigure(configExtensions(config)) });
+  // The facet only feeds StateField.create, so a live change has to arrive as an
+  // effect as well as through the reconfigure.
+  view.dispatch({
+    effects: [
+      configurable.reconfigure(configExtensions(config)),
+      setShowFrontmatter.of(config.showFrontmatter),
+    ],
+  });
 }
 
 /**

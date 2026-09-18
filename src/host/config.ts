@@ -31,5 +31,16 @@ export function readConfig(nonce: string): WebviewConfig {
     fontSize: typeof fontSize === "number" && Number.isFinite(fontSize) && fontSize > 0 ? fontSize : null,
     lineHeight: typeof lineHeight === "number" && Number.isFinite(lineHeight) && lineHeight > 0 ? lineHeight : null,
     readingMeasure: readingMeasure ? readingMeasure : null,
+    livePreview: cfg.get<boolean>("livePreview.enabled", true),
+    // One global preference, matching the desktop original: toggling it applies
+    // to every open hybrid editor at once.
+    showFrontmatter: !cfg.get<boolean>("frontmatter.collapsedByDefault", true),
   };
+}
+
+/** Flip the global frontmatter preference. */
+export async function setShowFrontmatter(show: boolean): Promise<void> {
+  await vscode.workspace
+    .getConfiguration(SECTION)
+    .update("frontmatter.collapsedByDefault", !show, vscode.ConfigurationTarget.Global);
 }

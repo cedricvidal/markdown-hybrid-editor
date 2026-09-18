@@ -76,3 +76,50 @@ body.vscode-high-contrast-light .cm-code {
   background: transparent;
   outline: 1px solid var(--line);
 }
+
+/* Collapsed frontmatter: one row of the note stands in for the YAML. The
+   hairline stays exactly where the expanded block draws it, so revealing the
+   block only pushes the text down — nothing moves sideways. */
+.cm-frontmatter-widget {
+  padding-bottom: 14px;
+}
+
+.cm-frontmatter-strip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0 10px;
+  border-bottom: 1px solid var(--line);
+  font: 400 13px / 1.45 var(--font-ui);
+  color: var(--muted);
+  cursor: pointer;
+  user-select: none;
+  white-space: normal;
+  transition: color var(--dur-fast) var(--ease);
+}
+
+.cm-frontmatter-strip .dot {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.cm-frontmatter-strip .grow {
+  flex: 1;
+}
+
+.cm-frontmatter-strip svg {
+  flex: none;
+  transition: translate var(--dur-fast) var(--ease);
+}
+
+.cm-frontmatter-strip:hover,
+.cm-frontmatter-strip:focus-visible {
+  color: var(--text);
+}
+
+.cm-frontmatter-strip:hover svg {
+  translate: 2px 0;
+}

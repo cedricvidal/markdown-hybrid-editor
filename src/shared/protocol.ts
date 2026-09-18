@@ -48,6 +48,8 @@ export interface WebviewConfig {
   lineHeight: number | null;
   /** A CSS length, or "none" for full width. */
   readingMeasure: string | null;
+  livePreview: boolean;
+  showFrontmatter: boolean;
 }
 
 /** host -> webview */
@@ -73,4 +75,6 @@ export type WebviewMessage =
   /** The view can no longer be trusted to match the document. */
   | { type: "resyncRequest"; reason: string }
   | { type: "selection"; selection: WireSelection; line: number; column: number; words: number }
+  /** The reveal affordance on the collapsed frontmatter strip was used. */
+  | { type: "setShowFrontmatter"; show: boolean }
   | { type: "error"; message: string };
