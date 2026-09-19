@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128"
+     role="img" aria-label="Markdown Hybrid Editor">
+  <!--
+    The product's one rule, drawn: the line the caret is on shows its marks,
+    every other line reads as prose. Four rows rather than a full paragraph —
+    at 32px in the extensions sidebar, air is what keeps it legible.
+  -->
+  <rect width="128" height="128" rx="24" fill="#17191D"/>
+  <rect x="0.75" y="0.75" width="126.5" height="126.5" rx="23.25"
+        fill="none" stroke="#FFFFFF" stroke-opacity="0.10" stroke-width="1.5"/>
+
+  <g fill="#EDEAE4">
+    <!-- a heading -->
+    <rect x="26" y="27" width="50" height="12" rx="6" fill-opacity="0.90"/>
+    <!-- prose: marks hidden, so the lines read quiet -->
+    <rect x="26" y="55" width="76" height="7" rx="3.5" fill-opacity="0.26"/>
+    <rect x="26" y="95" width="62" height="7" rx="3.5" fill-opacity="0.26"/>
+    <!-- the line under the caret, at full strength -->
+    <rect x="39" y="75" width="50" height="7" rx="3.5"/>
+  </g>
+
+  <!-- ...and its marks, standing proud of the text on either side -->
+  <g fill="#5AA0FF">
+    <rect x="26" y="72" width="8" height="13" rx="4"/>
+    <rect x="94" y="72" width="8" height="13" rx="4"/>
+  </g>
+</svg>

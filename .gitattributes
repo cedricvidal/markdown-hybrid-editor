@@ -3,3 +3,7 @@
 # This fixture exists to prove CRLF documents survive a round trip. Git must not
 # normalise it, or the test silently becomes a duplicate of the LF case.
 test/fixtures/crlf.md -text
+
+# README stills: never let text=auto near a PNG.
+docs/media/*.png binary
+media/*.png binary
