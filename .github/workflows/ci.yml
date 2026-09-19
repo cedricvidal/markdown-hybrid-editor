@@ -16,7 +16,7 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       # No version here on purpose: the action reads `packageManager` from
       # package.json, so the lockfile and CI can never disagree about pnpm.
