@@ -31,7 +31,7 @@ await fs.rm(framesDir, { recursive: true, force: true });
 await fs.mkdir(framesDir, { recursive: true });
 await fs.mkdir(outDir, { recursive: true });
 for (const file of await fs.readdir(outDir)) {
-  if (/^\d\d-.*\.png$/.test(file)) await fs.rm(path.join(outDir, file));
+  if (/^\d\d[a-z]?-.*\.png$/.test(file)) await fs.rm(path.join(outDir, file));
 }
 
 // Recorded off-screen: a three-minute run should not sit in front of whatever
