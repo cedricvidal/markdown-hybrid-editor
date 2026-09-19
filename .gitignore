@@ -13,5 +13,8 @@ demo/out/take-*/
 # (video, GIF and the numbered stills) are committed for the README.
 demo/out/m[0-9]-*.png
 demo/out/web*.png
+# 2x capture masters for the README stills. The 1x deliverables they are
+# resized into, in docs/media, are committed.
+demo/out/hero/
 
 .DS_Store

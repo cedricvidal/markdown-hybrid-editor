@@ -4,6 +4,12 @@
   "description": "Hybrid markdown editing: markup hides on every line the caret is not on, so a note reads like prose but edits like source.",
   "version": "0.0.1",
   "license": "MIT",
+  "icon": "media/icon.png",
+  "galleryBanner": {
+    "color": "#17191D",
+    "theme": "dark"
+  },
+  "preview": true,
   "author": {
     "name": "Cedric Vidal",
     "email": "cedric.vidal@gmail.com"
@@ -316,7 +322,10 @@
     "demo:video": "bash demo/build-video.sh",
     "demo:gif": "bash demo/build-gif.sh",
     "dev:install": "pnpm build && vsce package --no-dependencies -o .vsix-build.vsix && code --install-extension .vsix-build.vsix --force && rm -f .vsix-build.vsix",
-    "dev:sync": "pnpm build && node -e \"const{cpSync,existsSync,readdirSync}=require('fs'),{join}=require('path'),d=join(require('os').homedir(),'.vscode/extensions'),m=readdirSync(d).find(n=>n.startsWith('cedricvidal.markdown-hybrid-editor-'));if(!m){console.error('not installed — run pnpm dev:install first');process.exit(1)}cpSync('dist',join(d,m,'dist'),{recursive:true});cpSync('package.json',join(d,m,'package.json'));console.log('synced to',m,'— now run Developer: Reload Window')\""
+    "dev:sync": "pnpm build && node -e \"const{cpSync,existsSync,readdirSync}=require('fs'),{join}=require('path'),d=join(require('os').homedir(),'.vscode/extensions'),m=readdirSync(d).find(n=>n.startsWith('cedricvidal.markdown-hybrid-editor-'));if(!m){console.error('not installed — run pnpm dev:install first');process.exit(1)}cpSync('dist',join(d,m,'dist'),{recursive:true});cpSync('package.json',join(d,m,'package.json'));console.log('synced to',m,'— now run Developer: Reload Window')\"",
+    "icon:build": "rsvg-convert -w 128 -h 128 -a --background-color=none media/icon.svg -o media/icon.png && rsvg-convert -w 256 -h 256 -a --background-color=none media/icon.svg -o media/icon-256.png && magick media/icon.png -strip media/icon.png && magick media/icon-256.png -strip media/icon-256.png",
+    "demo:hero": "node demo/hero.mjs",
+    "demo:hero:check": "node demo/hero.mjs --check"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
