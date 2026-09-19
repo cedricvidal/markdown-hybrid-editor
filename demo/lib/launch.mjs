@@ -166,6 +166,21 @@ export async function openFile(page, name) {
   await page.waitForTimeout(400);
 }
 
+/**
+ * Open a workspace file without the Explorer, for shots where the side bar is
+ * hidden. `openFile` clicks an Explorer row, which is not there once the side
+ * bar is closed; three gates depend on that behaviour, so this is a separate
+ * function rather than a branch inside it.
+ */
+export async function quickOpen(page, name) {
+  await page.keyboard.press(`${MOD}+KeyP`);
+  await page.waitForSelector(".quick-input-widget", { state: "visible", timeout: 15_000 });
+  await page.keyboard.type(name, { delay: 25 });
+  await page.waitForSelector(`.quick-input-list .monaco-list-row:has-text("${name}")`, { timeout: 15_000 });
+  await page.keyboard.press("Enter");
+  await page.waitForTimeout(600);
+}
+
 /** Run a command by name through the palette, the way a user would. */
 export async function runCommand(page, name) {
   await page.keyboard.press(`${MOD}+Shift+KeyP`);
