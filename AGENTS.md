@@ -76,7 +76,7 @@ our own echo.
 | Gates | A throwaway `--user-data-dir` is **not** representative for testing an *installed* extension — it reported a working install as broken. Use `--extensionDevelopmentPath` for feature gates, and your real VS Code to check installation. |
 | Git | `.gitattributes` keeps `test/fixtures/crlf.md` byte-exact. Without it git normalises it and the EOL regression test quietly becomes a duplicate of the LF case. |
 | Git | `.gitignore` uses `/out/`, not `out/` — the latter also swallows `demo/out/`. |
-| Packaging | `vsce` refuses a README with non-HTTPS images and derives the base from a `repository` field this project does not have yet, so `dev:install` passes a placeholder. Add `repository` before publishing. |
+| Packaging | README images stay **relative**: `vsce` rewrites them to `raw.githubusercontent.com` from the `repository` field. Its regex is `[/.\w\s#-]`, so a filename containing `@` is silently left relative and packaging then dies on "Invalid image source" — hence `icon-256.png`, not `icon@2x.png`. It never rewrites `<a href>`, so links inside an HTML block must be absolute. |
 | Markdown | A frontmatter block's closing `---` makes the last YAML line look exactly like a setext H2. Anything scanning for headings must skip the block. |
 | CodeMirror | A decoration that replaces a **line break** must come from a `StateField`, never a ViewPlugin — line layout cannot depend on the viewport. Same constraint as block widgets. |
 | Design | The unit of "what the caret is on" is what the *reader* sees, not what the document holds. Once reflow joins a paragraph's lines, markup must reveal for the whole paragraph; revealing one source line leaves a patch of raw markdown mid-prose. |

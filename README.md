@@ -1,19 +1,61 @@
-# Markdown Hybrid Editor
+<p align="center">
+  <img src="media/icon-256.png" alt="" width="84" height="84">
+</p>
 
-A hybrid markdown editor for VS Code. Markdown marks are hidden on every line the
-caret is **not** on, so a note reads like prose but edits like source — no preview
-pane, no mode switch, no second copy of the document.
+<h1 align="center">Markdown Hybrid Editor</h1>
 
-Built on CodeMirror 6. Runs in VS Code desktop and in the browser
-(vscode.dev, github.dev).
+<p align="center">
+  <em>Markdown marks hide on every line the caret is not on,<br>
+  so a note reads like prose but edits like source.</em>
+</p>
 
-![Markdown Hybrid Editor](demo/out/walkthrough.gif)
+<p align="center">
+  <a href="#install">Install</a>
+  &nbsp;·&nbsp;
+  <a href="#what-it-does">What it does</a>
+  &nbsp;·&nbsp;
+  <a href="#what-you-give-up">What you give up</a>
+  &nbsp;·&nbsp;
+  <a href="#settings">Settings</a>
+</p>
 
-*A note reads as prose; the line under the caret shows its markdown.*
-[Full walkthrough (4 min)](demo/out/walkthrough.mp4)
+<p align="center">
+  <a href="https://github.com/cedricvidal/markdown-hybrid-editor/blob/HEAD/LICENSE"><img src="https://img.shields.io/badge/licence-MIT-6f7782?style=flat-square" alt="MIT licence"></a>
+  <a href="https://code.visualstudio.com/"><img src="https://img.shields.io/badge/VS%20Code-1.90%2B-6f7782?style=flat-square" alt="Requires VS Code 1.90 or newer"></a>
+</p>
+
+<p align="center">
+  <img src="docs/media/hero-dark.png" width="840" alt="A markdown note open in the hybrid editor: the prose reads clean, and the one line under the caret shows its markdown.">
+</p>
+
+<p align="center">
+  <sub><em>A note reads as prose; the line under the caret shows its markdown.</em></sub>
+</p>
+
+---
+
+No preview pane, no mode switch, no second copy of the document. Built on
+CodeMirror 6.
 
 > **Status:** early. The editor works and is covered by automated gates, but it
 > has not been through a release yet.
+
+## Install
+
+Not on the Marketplace yet. Until it is, build and install it from source:
+
+```bash
+git clone https://github.com/cedricvidal/markdown-hybrid-editor.git
+cd markdown-hybrid-editor
+pnpm install
+pnpm dev:install     # build, package, install into VS Code
+```
+
+Restart VS Code once. Every `.md` then opens here — see
+[Turning it off](#turning-it-off) if you would rather it did not.
+
+Requires VS Code 1.90 or newer. Runs on the desktop and in the browser
+(vscode.dev, github.dev).
 
 ## What it does
 
@@ -41,7 +83,57 @@ Built on CodeMirror 6. Runs in VS Code desktop and in the browser
   scale — or your normal editor font, if you prefer. Colours always follow your
   VS Code theme.
 
+<p align="center">
+  <img src="docs/media/caret-away.png" width="400" alt="A paragraph with the caret elsewhere: no asterisks, just prose.">
+  <img src="docs/media/caret-on.png" width="400" alt="The same paragraph with the caret on one line: that line shows its asterisks.">
+</p>
+
+<p align="center">
+  <sub><em>Put the caret on the line and the source comes straight back.</em></sub>
+</p>
+
 The file on disk is ordinary markdown throughout. This is a *view*, not a format.
+
+<details>
+<summary><strong>More of it</strong> — alerts, tables, frontmatter</summary>
+<br>
+
+<p align="center">
+  <img src="docs/media/alerts.png" width="840" alt="The five GitHub alert kinds, each a coloured rail with its name on a rule.">
+</p>
+
+<p align="center">
+  <sub><em>GitHub alerts are marked, not boxed — the prose stays prose.</em></sub>
+</p>
+
+<p align="center">
+  <img src="docs/media/tables.png" width="840" alt="A GFM table rendered as a real table, with column alignment and a wrapping cell.">
+</p>
+
+<p align="center">
+  <sub><em>Tables render as tables, and edit in place.</em></sub>
+</p>
+
+<p align="center">
+  <img src="docs/media/frontmatter.png" width="840" alt="YAML frontmatter unfolded: properties read as properties, with a guide per level of nesting.">
+</p>
+
+<p align="center">
+  <sub><em>Frontmatter folds into one row. Unfolded, it follows the same rule as the body.</em></sub>
+</p>
+
+</details>
+
+## Watch it work
+
+<p align="center">
+  <img src="demo/out/walkthrough.gif" width="840" alt="The editor in use: markup hiding and returning under the caret, and frontmatter folding into one row.">
+</p>
+
+Every beat of that recording is also an acceptance criterion — it is driven
+against a real VS Code by `pnpm demo:record`, so a green run is evidence the
+feature works, not just that it renders.
+[Full walkthrough (3 min 32 s)](demo/out/walkthrough.mp4)
 
 ## What you give up
 
@@ -78,8 +170,18 @@ Every `.md` opens here by default. To go back for one file, use the
 | `markdownHybridEditor.fontFamily` / `fontSize` / `lineHeight` / `readingMeasure` | — | Override the reading column |
 | `markdownHybridEditor.frontmatter.collapsedByDefault` | `true` | One global preference: the toggle applies to every open editor |
 | `markdownHybridEditor.livePreview.enabled` | `true` | Off shows raw markdown everywhere |
+| `markdownHybridEditor.reflowParagraphs` | `true` | Join a paragraph's soft-wrapped lines, the way markdown renders them. Off keeps every source line on its own line |
+| `markdownHybridEditor.softBreaks` | `mark` | While you edit a paragraph: `mark` shows a quiet `↵` and nothing moves, `unwrap` puts it back on its source lines |
 | `markdownHybridEditor.tables.render` | `true` | Off edits tables as markdown |
 | `markdownHybridEditor.maxFileSize` | `1500000` | Larger documents open with a notice instead |
+
+<p align="center">
+  <img src="docs/media/hero-light.png" width="840" alt="The same note in a light theme: the colours follow VS Code, the reading column does not change.">
+</p>
+
+<p align="center">
+  <sub><em>Colours always follow your VS Code theme. No reload, no second set of settings.</em></sub>
+</p>
 
 ## Security
 
@@ -124,9 +226,8 @@ pnpm dev:sync      # rebuild and copy into the installed extension
 …then **Developer: Reload Window** (<kbd>⌘R</kbd>). Host-side changes need the
 reload; webview-only changes need only the tab reopened.
 
-> [!NOTE]
-> A symlink in `~/.vscode/extensions` does **not** work. VS Code only loads
-> extensions listed in that folder's `extensions.json`, which the installer
+> **Note** — a symlink in `~/.vscode/extensions` does **not** work. VS Code only
+> loads extensions listed in that folder's `extensions.json`, which the installer
 > writes — a hand-made folder or link there is ignored silently.
 
 Note that `.md` files open in this editor once it is loaded — see
@@ -137,6 +238,13 @@ cedricvidal.markdown-hybrid-editor` removes it.
 
 `pnpm watch`, then <kbd>F5</kbd>, which launches an Extension Development Host
 with the extension loaded and leaves your own VS Code untouched.
+
+### The README's own images
+
+`pnpm icon:build` rasterises `media/icon.svg`. `pnpm demo:hero` re-captures every
+still in `docs/media/` by driving a real VS Code with its chrome hidden, and
+asserts what it photographs — a shot of "the marks come back under the caret" is
+only taken once the rendered line has been read back and confirmed.
 
 ## Licence
 
