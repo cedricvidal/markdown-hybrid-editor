@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/cedricvidal/markdown-hybrid-editor/security/advisories/new
+    about: A note that escapes the webview is a security bug — report it privately, not here.
+  - name: How it works, and why
+    url: https://github.com/cedricvidal/markdown-hybrid-editor/blob/main/AGENTS.md
+    about: Architecture, the rules that keep it, and the gotchas that cost real time.

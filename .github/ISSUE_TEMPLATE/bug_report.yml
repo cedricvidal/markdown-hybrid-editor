@@ -1,0 +1,79 @@
+name: Bug report
+description: Something renders wrong, edits wrong, or does not come back.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Found a way for a note to execute script, load a remote resource or
+        reach the workspace? That is a security issue — please
+        [report it privately](https://github.com/cedricvidal/markdown-hybrid-editor/security/advisories/new)
+        instead.
+
+  - type: textarea
+    id: markdown
+    attributes:
+      label: The markdown
+      description: >
+        The smallest note that shows it. Paste the source, not a screenshot —
+        almost every bug here is "this markdown renders wrong", and the source
+        is what reproduces it. Trailing spaces and CRLF matter, so say so if
+        yours has them.
+      render: markdown
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened, and what you expected
+      description: A screenshot helps for anything visual.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps
+      description: Where the caret was, what you typed. Leave blank if it happens on open.
+
+  - type: input
+    id: vscode-version
+    attributes:
+      label: VS Code version
+      description: "Help → About, or `code --version`. Needs 1.90 or newer."
+      placeholder: 1.95.3
+    validations:
+      required: true
+
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where
+      options:
+        - Desktop
+        - The web (vscode.dev / github.dev)
+        - Both
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: OS
+      placeholder: macOS 15.1 / Windows 11 / Ubuntu 24.04
+
+  - type: textarea
+    id: settings
+    attributes:
+      label: Settings
+      description: >
+        Any `markdownHybridEditor.*` you have changed from the default —
+        `typography`, `reflowParagraphs` and `softBreaks` change layout the most.
+      render: jsonc
+
+  - type: textarea
+    id: extension-version
+    attributes:
+      label: Extension version
+      description: Or the commit you built from.

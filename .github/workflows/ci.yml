@@ -1,0 +1,31 @@
+# The headless half of the gates: lint, three typechecks, unit tests, build.
+# `pnpm demo:gates` is deliberately not here — it drives a real VS Code through
+# Playwright for ten minutes, needs a display, and is a poor required check.
+# It stays a local gate; see AGENTS.md.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      # No version here on purpose: the action reads `packageManager` from
+      # package.json, so the lockfile and CI can never disagree about pnpm.
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm verify

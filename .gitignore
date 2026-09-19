@@ -9,10 +9,13 @@ dist/
 # Recording harness: frames are transient, rebuilt on every run.
 demo/frames/
 demo/out/take-*/
-# Gate screenshots are regenerated on every run; the walkthrough assets
-# (video, GIF and the numbered stills) are committed for the README.
+# Gate screenshots are regenerated on every run; only the walkthrough video
+# and GIF are committed, because the README embeds them.
 demo/out/m[0-9]-*.png
 demo/out/web*.png
+# The per-beat stills record.mjs takes. Nothing links to them — the README's
+# own images live in docs/media — and every run rewrites them.
+demo/out/[0-9][0-9]*.png
 # 2x capture masters for the README stills. The 1x deliverables they are
 # resized into, in docs/media, are committed.
 demo/out/hero/

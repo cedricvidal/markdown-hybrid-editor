@@ -1,0 +1,24 @@
+name: Feature request
+description: Something it should do, or should stop doing.
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: >
+        Some gaps are decisions — there is no separate undo stack because VS Code
+        owns undo, for instance. [AGENTS.md](https://github.com/cedricvidal/markdown-hybrid-editor/blob/main/AGENTS.md)
+        is worth a skim first.
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What, and why
+      description: What you were trying to do when you wanted it.
+    validations:
+      required: true
+
+  - type: textarea
+    id: shape
+    attributes:
+      label: What it would look like
+      description: Optional. A markdown example, or how it should behave under the caret.
